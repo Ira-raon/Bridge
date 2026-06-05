@@ -11,6 +11,21 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool isSignIn = true;
+    bool _isLoading = false;
+
+  final _formKey = GlobalKey<FormState>();
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final nameController = TextEditingController();
+
+  @override
+void dispose() {
+  emailController.dispose();
+  passwordController.dispose();
+  nameController.dispose();
+  super.dispose();
+}
 
   void _continue() {
     Navigator.of(context).push(
@@ -21,6 +36,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    
 
     return Scaffold(
       body: Container(
@@ -72,66 +88,84 @@ class _AuthScreenState extends State<AuthScreen> {
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(20),
-                      child: Column(
-                        children: [
-                          SegmentedButton<bool>(
-                            segments: const [
-                              ButtonSegment<bool>(
-                                value: true,
-                                label: Text('Sign in'),
-                              ),
-                              ButtonSegment<bool>(
-                                value: false,
-                                label: Text('Sign up'),
-                              ),
-                            ],
-                            selected: {isSignIn},
-                            onSelectionChanged: (selection) {
-                              setState(() {
-                                isSignIn = selection.first;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
-                              prefixIcon: Icon(Icons.mail_outline),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            SegmentedButton<bool>(
+                              segments: const [
+                                ButtonSegment<bool>(
+                                  value: true,
+                                  label: Text('Sign in'),
+                                ),
+                                ButtonSegment<bool>(
+                                  value: false,
+                                  label: Text('Sign up'),
+                                ),
+                              ],
+                              selected: {isSignIn},
+                              onSelectionChanged: (selection) {
+                                setState(() {
+                                  isSignIn = selection.first;
+                                });
+                              },
                             ),
-                          ),
-                          const SizedBox(height: 14),
-                          TextField(
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
-                              prefixIcon: Icon(Icons.lock_outline),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: emailController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                }
+                                return null;
+                              },
+                              decoration: const InputDecoration(
+                                labelText: 'Email',
+                                prefixIcon: Icon(Icons.mail_outline),
+                              ),
                             ),
-                          ),
-                          if (!isSignIn) ...[
-                            const SizedBox(height: 14),
-                            TextField(
+                            TextFormField(
+                              controller: passwordController,
+                              obscureText: true,
+                              validator: (value) {
+                                if (value == null || value.length < 6) {
+                                  return 'Password must be at least 6 characters';
+                                }
+                                return null;
+                              },
+                              decoration: const InputDecoration(
+                                labelText: 'Password',
+                                prefixIcon: Icon(Icons.lock_outline),
+                              ),
+                            ),
+                            TextFormField(
+                              controller: nameController,
+                              validator: (value) {
+                                if (!isSignIn &&
+                                    (value == null || value.trim().isEmpty)) {
+                                  return 'Please enter a display name';
+                                }
+                                return null;
+                              },
                               decoration: const InputDecoration(
                                 labelText: 'Display name',
                                 prefixIcon: Icon(Icons.person_outline),
                               ),
                             ),
-                          ],
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: _continue,
-                              child: Text(
-                                isSignIn ? 'Sign in' : 'Create account',
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                onPressed: _continue,
+                                child: Text(
+                                  isSignIn ? 'Sign in' : 'Create account',
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          TextButton(
-                            onPressed: _continue,
-                            child: const Text('Continue to profile setup'),
-                          ),
-                        ],
+                            const SizedBox(height: 10),
+                           
+                          ],
+                        ),
                       ),
                     ),
                   ),
