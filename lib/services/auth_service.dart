@@ -19,11 +19,18 @@ class AuthService {
       throw Exception('User creation failed');
     }
 
-    await _supabase.from('profiles').insert({
-      'id': user.id,
-      'email': email,
-      'display_name': displayName,
-    });
+    try {
+  await _supabase.from('profiles').insert({
+    'id': user.id,
+    'email': email,
+    'display_name': displayName,
+  });
+
+  print('PROFILE CREATED');
+} catch (e) {
+  print('PROFILE ERROR: $e');
+  rethrow;
+}
   }
 
   Future<void> signIn({
