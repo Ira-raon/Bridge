@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 
 import 'profile_screen.dart';
 
@@ -12,6 +13,7 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   bool isSignIn = true;
     bool _isLoading = false;
+  final AuthService _authService = AuthService();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -27,11 +29,52 @@ void dispose() {
   super.dispose();
 }
 
-  void _continue() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const ProfileScreen()),
-    );
+  Future<void> _submit() async {
+  if (!_formKey.currentState!.validate()) {
+    return;
   }
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    if (isSignIn) {
+      await _authService.signIn(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+    } else {
+      await _authService.signUp(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+        displayName: nameController.text.trim(),
+      );
+    }
+
+    if (!mounted) return;
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => const ProfileScreen(),
+      ),
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -156,10 +199,20 @@ void dispose() {
                             SizedBox(
                               width: double.infinity,
                               child: FilledButton(
-                                onPressed: _continue,
-                                child: Text(
-                                  isSignIn ? 'Sign in' : 'Create account',
-                                ),
+                                onPressed: _isLoading ? null : _submit,
+                                child: _isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(
+                                      isSignIn
+                                          ? 'Sign in'
+                                          : 'Create account',
+                                    ),
                               ),
                             ),
                             const SizedBox(height: 10),
