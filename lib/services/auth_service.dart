@@ -50,4 +50,19 @@ class AuthService {
   User? get currentUser {
     return _supabase.auth.currentUser;
   }
+  Future<void> createProfileForCurrentUser({
+  required String displayName,
+}) async {
+  final user = _supabase.auth.currentUser;
+
+  if (user == null) {
+    throw Exception('No authenticated user');
+  }
+
+  await _supabase.from('profiles').upsert({
+    'id': user.id,
+    'email': user.email,
+    'display_name': displayName,
+  });
+}
 }

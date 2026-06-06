@@ -1,18 +1,34 @@
-enum AdviceTopic { socialLife, careerAdvice, personalRelationships }
+enum AdviceTopic {careerAdvice, socialLife, PersonalRelationships}
 
 enum SupportStyle { empathetic, blunt, both }
 
 enum ExperiencePreference { sameExperience, similarSituation, noPreference }
 
-enum UserRole { seeker, sharer }
+enum UserRole {seeker, sharer, both,}
 
 enum AgeBand { youth, youngAdult, adult, older }
+
+enum LifeExperience {
+  careerChange,
+  entrepreneurship,
+  parenthood,
+  grief,
+  immigration,
+  retirement,
+  higherEducation,
+  financialHardship,
+  relationshipBreakdown,
+  healthChallenge,
+}
+
+enum LifeStage {student, earlyCareer, midCareer, retired}
 
 extension AdviceTopicLabel on AdviceTopic {
   String get label => switch (this) {
         AdviceTopic.socialLife => 'Social life',
         AdviceTopic.careerAdvice => 'Career advice',
-        AdviceTopic.personalRelationships => 'Personal relationships',
+        AdviceTopic.PersonalRelationships => 'Personal relationships', 
+       
       };
 }
 
@@ -51,6 +67,8 @@ class UserPreferences {
     required this.experiencePreference,
     required this.careerField,
     required this.preferSameCareerField,
+    required this.additionalNotes,
+    required this.lifeExperiences,
   });
 
   final String displayName;
@@ -61,6 +79,8 @@ class UserPreferences {
   final ExperiencePreference experiencePreference;
   final String careerField;
   final bool preferSameCareerField;
+  final Set<LifeExperience> lifeExperiences;
+  final String additionalNotes;
 }
 
 class CommunityMember {
@@ -99,4 +119,25 @@ class MatchResult {
   final CommunityMember member;
   final int score;
   final List<String> reasons;
+}
+extension UserRoleLabel on UserRole {
+  String get label => switch (this) {
+        UserRole.seeker => 'Looking for guidance',
+        UserRole.sharer => 'Sharing my experience',
+        UserRole.both => 'Both',
+      };
+}
+extension LifeExperienceLabel on LifeExperience {
+  String get label => switch (this) {
+        LifeExperience.careerChange => 'Career change',
+        LifeExperience.entrepreneurship => 'Started a business',
+        LifeExperience.parenthood => 'Parenthood',
+        LifeExperience.grief => 'Grief and loss',
+        LifeExperience.immigration => 'Immigration',
+        LifeExperience.retirement => 'Retirement',
+        LifeExperience.higherEducation => 'Higher education',
+        LifeExperience.financialHardship => 'Financial hardship',
+        LifeExperience.relationshipBreakdown => 'Relationship breakdown',
+        LifeExperience.healthChallenge => 'Health challenge',
+      };
 }

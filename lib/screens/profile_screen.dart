@@ -20,6 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final Set<AdviceTopic> _selectedTopics = {AdviceTopic.careerAdvice};
   final Set<SupportStyle> _selectedStyles = {SupportStyle.empathetic};
   ExperiencePreference _experiencePreference = ExperiencePreference.sameExperience;
+  UserRole _selectedRole = UserRole.seeker;
   bool _premiumAccess = false;
   bool _preferSameCareerField = true;
 
@@ -33,14 +34,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _openPlatform(BuildContext context) {
     final preferences = UserPreferences(
+      
       displayName: _nameController.text.trim().isEmpty ? 'New Bridge member' : _nameController.text.trim(),
       premium: _premiumAccess,
-      role: UserRole.seeker,
+      role: _selectedRole,
       adviceTopics: _selectedTopics.isEmpty ? {AdviceTopic.careerAdvice} : _selectedTopics,
       supportStyles: _selectedStyles.isEmpty ? {SupportStyle.both} : _selectedStyles,
       experiencePreference: _experiencePreference,
       careerField: _careerFieldController.text.trim(),
       preferSameCareerField: _preferSameCareerField,
+      additionalNotes: _shareController.text.trim(),
+      lifeExperiences: const {}, // To be extended to capture specific life experiences in the future
     );
 
     ProfileService.instance.save(preferences);
@@ -87,6 +91,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 20),
           _ProfileCard(nameController: _nameController),
+          const SizedBox(height: 18),
+          const _PreferenceLabel(
+          title: 'What best describes you?',
+           subtitle: 'This helps Bridge know how you want to participate.',
+             ),
+         const SizedBox(height: 12),
+
+          SegmentedButton<UserRole>(
+           segments: UserRole.values
+             .map(
+               (role) => ButtonSegment<UserRole>(
+               value: role,
+               label: Text(role.label),
+             ),
+           )
+            .toList(),
+             selected: {_selectedRole},
+           onSelectionChanged: (selection) {
+           setState(() {
+            _selectedRole = selection.first;
+            });
+          },
+         ),
+
           const SizedBox(height: 18),
           const _PreferenceLabel(
             title: 'What are you looking for?',
@@ -161,18 +189,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
             },
           ),
-          const SizedBox(height: 18),
-          SwitchListTile.adaptive(
-            contentPadding: EdgeInsets.zero,
-            value: _premiumAccess,
-            title: const Text('Premium matching'),
-            subtitle: const Text('Still prioritizes older sharers, but also unlocks strong peer-to-peer matches.'),
-            onChanged: (value) {
-              setState(() {
-                _premiumAccess = value;
-              });
-            },
-          ),
+          // const SizedBox(height: 18),
+          // SwitchListTile.adaptive(
+          //   contentPadding: EdgeInsets.zero,
+          //   value: _premiumAccess,
+          //   title: const Text('Premium matching'),
+          //   subtitle: const Text('Still prioritizes older sharers, but also unlocks strong peer-to-peer matches.'),
+          //   onChanged: (value) {
+          //     setState(() {
+          //       _premiumAccess = value;
+          //     });
+          //   },
+          // ),
           const SizedBox(height: 10),
           TextField(
             controller: _careerFieldController,
