@@ -104,12 +104,12 @@ class MatchService {
       if (member.ageBand == AgeBand.older) {
         score += 18;
       }
-    } else if (preferences.premium) {
-      score += 10;
-      reasons.add('Premium peer match');
-      if (member.ageBand == AgeBand.youngAdult) {
-        score += 6;
-      }
+      // } else if (preferences.premium) {
+      //   score += 10;
+      //   reasons.add('Premium peer match');
+      //   if (member.ageBand == AgeBand.youngAdult) {
+      //     score += 6;
+      //   }
     } else {
       score -= 100;
     }
@@ -137,10 +137,10 @@ class MatchService {
       }
     }
 
-    if (preferences.premium && member.role == UserRole.seeker && member.ageBand != AgeBand.older) {
-      score += 8;
-      reasons.add('Premium expands peer options');
-    }
+    //if (preferences.premium && member.role == UserRole.seeker && member.ageBand != AgeBand.older) {
+    //   score += 8;
+    //   reasons.add('Premium expands peer options');
+    // }
 
     if (score < 0) {
       score = 0;

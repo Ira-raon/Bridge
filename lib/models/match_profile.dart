@@ -60,7 +60,7 @@ extension AgeBandLabel on AgeBand {
 class UserPreferences {
   const UserPreferences({
     required this.displayName,
-    required this.premium,
+    //required this.premium,
     required this.role,
     required this.adviceTopics,
     required this.supportStyles,
@@ -72,7 +72,7 @@ class UserPreferences {
   });
 
   final String displayName;
-  final bool premium;
+  //final bool premium;
   final UserRole role;
   final Set<AdviceTopic> adviceTopics;
   final Set<SupportStyle> supportStyles;

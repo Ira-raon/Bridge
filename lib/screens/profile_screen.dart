@@ -21,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final Set<SupportStyle> _selectedStyles = {SupportStyle.empathetic};
   ExperiencePreference _experiencePreference = ExperiencePreference.sameExperience;
   UserRole _selectedRole = UserRole.seeker;
-  bool _premiumAccess = false;
+  // bool _premiumAccess = false;
   bool _preferSameCareerField = true;
 
   @override
@@ -37,7 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     displayName: _nameController.text.trim().isEmpty
         ? 'New Bridge member'
         : _nameController.text.trim(),
-    premium: _premiumAccess,
+    // premium: _premiumAccess,
     role: _selectedRole,
     adviceTopics: _selectedTopics.isEmpty
         ? {AdviceTopic.careerAdvice}

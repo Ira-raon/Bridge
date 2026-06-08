@@ -119,7 +119,7 @@ class _RecommendedMatchesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     const effectivePreferences = UserPreferences(
       displayName: 'Bridge member',
-      premium: false,
+     // premium: false,
       role: UserRole.seeker,
       adviceTopics: {AdviceTopic.careerAdvice},
       supportStyles: {SupportStyle.empathetic},
