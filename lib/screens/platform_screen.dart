@@ -4,7 +4,6 @@ import '../models/discussion_topic.dart';
 import '../models/match_profile.dart';
 import '../services/discussion_service.dart';
 import '../services/match_service.dart';
-import '../services/profile_service.dart';
 import 'discussion_chatroom_screen.dart';
 import 'life_library_screen.dart';
 
@@ -118,83 +117,51 @@ class _RecommendedMatchesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<UserPreferences?>(
-      valueListenable: ProfileService.instance.currentPreferences,
-      builder: (context, preferences, _) {
-        final effectivePreferences = preferences ?? const UserPreferences(
-          displayName: 'Bridge member',
-          premium: false,
-          role: UserRole.seeker,
-          adviceTopics: {AdviceTopic.careerAdvice},
-          supportStyles: {SupportStyle.empathetic},
-          experiencePreference: ExperiencePreference.sameExperience,
-          careerField: '',
-          preferSameCareerField: false,
-        );
+    const effectivePreferences = UserPreferences(
+      displayName: 'Bridge member',
+      premium: false,
+      role: UserRole.seeker,
+      adviceTopics: {AdviceTopic.careerAdvice},
+      supportStyles: {SupportStyle.empathetic},
+      experiencePreference: ExperiencePreference.sameExperience,
+      careerField: '',
+      preferSameCareerField: false,
+      additionalNotes: '',
+      lifeExperiences: {},
+    );
 
-        final matches = MatchService.instance.recommend(effectivePreferences);
-        final headline = effectivePreferences.premium
-            ? 'Premium adds peer-to-peer backups after older sharers.'
-            : 'Basic mode prioritizes older sharers with lived experience.';
+    final matches =
+        MatchService.instance.recommend(effectivePreferences);
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _SectionHeader(
-              title: 'Recommended matches',
-              subtitle: 'Ranked by shared topic, tone, and experience.',
-            ),
-            const SizedBox(height: 8),
-            Text(
-              headline,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF5F7074),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionHeader(
+          title: 'Recommended matches',
+          subtitle: 'Ranked by shared topic, tone, and experience.',
+        ),
+        const SizedBox(height: 14),
+
+        if (matches.isEmpty)
+          const _EmptyMatchesCard()
+        else
+          Column(
+            children: matches
+                .map(
+                  (match) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _MatchCard(
+                      match: match,
+                      onPlanTopic: () {},
+                    ),
                   ),
-            ),
-            const SizedBox(height: 14),
-            if (matches.isEmpty)
-              const _EmptyMatchesCard()
-            else
-              Column(
-                children: matches
-                    .map(
-                      (match) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _MatchCard(
-                          match: match,
-                          onPlanTopic: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) {
-                                final topic = DiscussionTopic(
-                                  id: 'draft-${match.member.id}-${DateTime.now().microsecondsSinceEpoch}',
-                                  matchId: match.member.id,
-                                  matchName: match.member.name,
-                                  roomId: 'room-${DateTime.now().microsecondsSinceEpoch}',
-                                  category: AdviceTopic.careerAdvice,
-                                  title: 'New topic with ${match.member.name}',
-                                  cadence: DiscussionCadence.weekly,
-                                  goal: 'Plan the first structured discussion.',
-                                  createdAt: DateTime.now(),
-                                  progressScore: 0,
-                                  sessions: const [],
-                                );
-                                DiscussionService.instance.addTopic(topic);
-                                return DiscussionChatroomScreen(topic: topic);
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-          ],
-        );
-      },
+                )
+                .toList(),
+          ),
+      ],
     );
   }
 }
-
 class _MatchCard extends StatelessWidget {
   const _MatchCard({required this.match, required this.onPlanTopic});
 

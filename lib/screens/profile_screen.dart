@@ -32,27 +32,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  void _openPlatform(BuildContext context) {
-    final preferences = UserPreferences(
-      
-      displayName: _nameController.text.trim().isEmpty ? 'New Bridge member' : _nameController.text.trim(),
-      premium: _premiumAccess,
-      role: _selectedRole,
-      adviceTopics: _selectedTopics.isEmpty ? {AdviceTopic.careerAdvice} : _selectedTopics,
-      supportStyles: _selectedStyles.isEmpty ? {SupportStyle.both} : _selectedStyles,
-      experiencePreference: _experiencePreference,
-      careerField: _careerFieldController.text.trim(),
-      preferSameCareerField: _preferSameCareerField,
-      additionalNotes: _shareController.text.trim(),
-      lifeExperiences: const {}, // To be extended to capture specific life experiences in the future
+  Future<void> _openPlatform(BuildContext context) async {
+  final preferences = UserPreferences(
+    displayName: _nameController.text.trim().isEmpty
+        ? 'New Bridge member'
+        : _nameController.text.trim(),
+    premium: _premiumAccess,
+    role: _selectedRole,
+    adviceTopics: _selectedTopics.isEmpty
+        ? {AdviceTopic.careerAdvice}
+        : _selectedTopics,
+    supportStyles: _selectedStyles.isEmpty
+        ? {SupportStyle.both}
+        : _selectedStyles,
+    experiencePreference: _experiencePreference,
+    careerField: _careerFieldController.text.trim(),
+    preferSameCareerField: _preferSameCareerField,
+    additionalNotes: _shareController.text.trim(),
+    lifeExperiences: const {},
+  );
+
+  try {
+    await ProfileService.instance.saveProfile(
+      preferences,
     );
 
-    ProfileService.instance.save(preferences);
+    if (!mounted) return;
 
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => const PlatformScreen()),
+      MaterialPageRoute<void>(
+        builder: (_) => const PlatformScreen(),
+      ),
     );
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Failed to save profile: $e',
+         ),
+        ),
+      );
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {

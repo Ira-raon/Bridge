@@ -1,4 +1,4 @@
-enum AdviceTopic {careerAdvice, socialLife, PersonalRelationships}
+enum AdviceTopic {careerAdvice, socialLife, personalRelationships}
 
 enum SupportStyle { empathetic, blunt, both }
 
@@ -27,7 +27,7 @@ extension AdviceTopicLabel on AdviceTopic {
   String get label => switch (this) {
         AdviceTopic.socialLife => 'Social life',
         AdviceTopic.careerAdvice => 'Career advice',
-        AdviceTopic.PersonalRelationships => 'Personal relationships', 
+        AdviceTopic.personalRelationships => 'Personal relationships', 
        
       };
 }
