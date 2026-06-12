@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../services/discussion_service_v2.dart';
 import '../models/discussion_topic.dart';
 import '../models/match_profile.dart';
 import '../services/discussion_service.dart';
@@ -101,6 +101,20 @@ class _PlatformScreenState extends State<PlatformScreen> {
             maxLines: 3,
           ),
           const SizedBox(height: 14),
+          FilledButton(
+  onPressed: () async {
+    await DiscussionServiceV2.instance.createRoom(
+      topicTitle: 'Test Discussion',
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Room created'),
+      ),
+    );
+  },
+  child: const Text('Create Test Room'),
+),          const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () {},
             icon: const Icon(Icons.send_rounded),

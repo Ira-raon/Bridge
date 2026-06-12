@@ -1,0 +1,64 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class DiscussionServiceV2 {
+  DiscussionServiceV2._();
+
+  static final instance = DiscussionServiceV2._();
+
+  final _supabase = Supabase.instance.client;
+
+  Future<List<Map<String, dynamic>>> getRooms() async {
+    final response = await _supabase
+        .from('discussion_rooms')
+        .select()
+        .order('created_at');
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<void> createRoom({
+    required String topicTitle,
+  }) async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) {
+      throw Exception('User not signed in');
+    }
+
+    await _supabase.from('discussion_rooms').insert({
+      'topic_title': topicTitle,
+      'created_by': user.id,
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getMessages(
+    String roomId,
+  ) async {
+    final response = await _supabase
+        .from('discussion_messages')
+        .select()
+        .eq('room_id', roomId)
+        .order('created_at');
+
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  Future<void> sendMessage({
+    required String roomId,
+    required String body,
+  }) async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) {
+      throw Exception('User not signed in');
+    }
+
+    await _supabase.from('discussion_messages').insert({
+      'room_id': roomId,
+      'sender_id': user.id,
+      'sender_name':
+          user.email ?? 'Bridge Member',
+      'body': body,
+    });
+  }
+}
