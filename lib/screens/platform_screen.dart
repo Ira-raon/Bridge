@@ -101,28 +101,28 @@ class _PlatformScreenState extends State<PlatformScreen> {
             maxLines: 3,
           ),
           const SizedBox(height: 14),
-          FilledButton(
-  onPressed: () async {
-    await DiscussionServiceV2.instance.createRoom(
-      topicTitle: 'Test Discussion',
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Room created'),
-      ),
-    );
-  },
-  child: const Text('Create Test Room'),
-),          const SizedBox(height: 12),
-FilledButton(
+        FilledButton(
   onPressed: () async {
     final rooms =
         await DiscussionServiceV2.instance.getRooms();
 
-    print(rooms);
+    if (rooms.isEmpty) return;
+
+    final roomId = rooms.first['id'];
+
+    await DiscussionServiceV2.instance.sendMessage(
+      roomId: roomId,
+      body: 'Hello Bridge',
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Message sent'),
+      ),
+    );
   },
-  child: const Text('Load Rooms'),
+  child: const Text('Send Test Message'),
+
 ), const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () {},
