@@ -115,6 +115,15 @@ class _PlatformScreenState extends State<PlatformScreen> {
   },
   child: const Text('Create Test Room'),
 ),          const SizedBox(height: 12),
+FilledButton(
+  onPressed: () async {
+    final rooms =
+        await DiscussionServiceV2.instance.getRooms();
+
+    print(rooms);
+  },
+  child: const Text('Load Rooms'),
+), const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () {},
             icon: const Icon(Icons.send_rounded),
