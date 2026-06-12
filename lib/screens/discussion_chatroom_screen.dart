@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/discussion_service_v2.dart';
 
 import '../models/discussion_room.dart';
 import '../models/discussion_topic.dart';
@@ -16,6 +17,41 @@ class DiscussionChatroomScreen extends StatefulWidget {
 class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
   final DiscussionService _service = DiscussionService.instance;
   final _messageController = TextEditingController();
+  final _dbService = DiscussionServiceV2.instance;
+
+  List<Map<String, dynamic>> _messages = [];
+
+  bool _loading = true;
+
+  Future<void> _loadMessages() async {
+    try {
+      final room = await _dbService.getRooms();
+  
+      if (room.isEmpty) {
+        setState(() {
+          _loading = false;
+        });
+        return;
+      }
+  
+      final roomId = room.first['id'];
+  
+      final messages =
+          await _dbService.getMessages(roomId);
+  
+      setState(() {
+        _messages = messages;
+        _loading = false;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages();
+  }
 
   @override
   void dispose() {
@@ -55,7 +91,17 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
                   children: [
                     _RoomHeader(room: room),
                     const SizedBox(height: 12),
-                    ...room.messages.map((message) => _MessageBubble(message: message)),
+                    // ...room.messages.map((message) => _MessageBubble(message: message))
+                    ..._messages.map(
+  (message) => ListTile(
+    title: Text(
+      message['sender_name'] ?? '',
+    ),
+    subtitle: Text(
+      message['body'] ?? '',
+    ),
+  ),
+),
                     const SizedBox(height: 12),
                     if (forum != null) ...[
                       _ForumPanel(forum: forum),
@@ -66,16 +112,24 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
               ),
               _Composer(
                 controller: _messageController,
-                onSend: () {
+                onSend: () async{
                   final text = _messageController.text.trim();
                   if (text.isEmpty) return;
-                  _service.addRoomMessage(
-                    roomId: room.id,
-                    author: 'You',
-                    body: text,
-                  );
-                  _messageController.clear();
-                  setState(() {});
+                  // _service.addRoomMessage(
+                  //   roomId: room.id,
+                  //   author: 'You',
+                  //   body: text,
+                  // );
+                  await _dbService.sendMessage(
+  roomId: room.id,
+  body: text,
+);
+
+_messageController.clear();
+
+await _loadMessages();
+                  // _messageController.clear();
+                  // setState(() {});
                 },
               ),
             ],
