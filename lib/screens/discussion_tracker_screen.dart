@@ -6,6 +6,7 @@ import '../models/match_profile.dart';
 import '../services/discussion_service.dart';
 import '../services/match_service.dart';
 import 'discussion_chatroom_screen.dart';
+import '../services/discussion_service_v2.dart';
 
 class DiscussionTrackerScreen extends StatefulWidget {
   const DiscussionTrackerScreen({super.key, this.initialMatch});
@@ -25,6 +26,17 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Discussion tracker'),
+        actions: [
+  IconButton(
+    icon: const Icon(Icons.storage),
+    onPressed: () async {
+      final rooms =
+          await DiscussionServiceV2.instance.getRooms();
+
+      debugPrint(rooms.toString());
+    },
+  ),
+],
       ),
       body: ValueListenableBuilder<List<DiscussionTopic>>(
         valueListenable: _service.topics,
@@ -91,6 +103,10 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
     if (draft == null) {
       return;
     }
+
+    await DiscussionServiceV2.instance.createRoom(
+      topicTitle: draft.title,
+    );
 
     _service.addTopic(
       DiscussionTopic(
