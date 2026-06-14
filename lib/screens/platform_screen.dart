@@ -3,7 +3,7 @@ import '../models/match_profile.dart';
 import '../services/match_service.dart';
 import 'life_library_screen.dart';
 import 'discussion_tracker_screen.dart';
-import 'profile_screen.dart';
+import 'profile_setup_screen.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -50,7 +50,7 @@ class _PlatformScreenState extends State<PlatformScreen> {
         case 2:
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => const ProfileScreen(),
+              builder: (_) => const ProfileSetupScreen(),
             ),
           );
           break;

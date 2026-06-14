@@ -3,7 +3,7 @@ import '../services/auth_service.dart';
 import 'platform_screen.dart';
 import '../services/profile_service.dart';
 
-import 'profile_screen.dart';
+import 'profile_setup_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -58,12 +58,12 @@ void dispose() {
     await ProfileService.instance.profileExists();
 
     if (!mounted) return;
-    
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
         builder: (_) => hasCompletedProfile
             ? const PlatformScreen()
-            : const ProfileScreen(),
+            : const ProfileSetupScreen(),
       ),
     );
   } catch (e) {
