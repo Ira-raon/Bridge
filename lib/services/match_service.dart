@@ -1,79 +1,51 @@
 import '../models/match_profile.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MatchService {
   MatchService._privateConstructor();
+  final _supabase = Supabase.instance.client;
 
   static final MatchService _instance = MatchService._privateConstructor();
 
   static MatchService get instance => _instance;
 
-  List<CommunityMember> get communityMembers => List.unmodifiable(_community);
+  Future<List<Map<String, dynamic>>> getProfiles() async {
+  final currentUser = _supabase.auth.currentUser;
 
-  final List<CommunityMember> _community = const [
-    CommunityMember(
-      id: 'ruth-retired-nurse',
-      name: 'Ruth',
-      role: UserRole.sharer,
-      ageBand: AgeBand.older,
-      adviceTopics: {AdviceTopic.personalRelationships, AdviceTopic.socialLife},
-      supportStyles: {SupportStyle.empathetic, SupportStyle.both},
-      experienceTags: {'retirement transition', 'caregiving', 'community support'},
-      careerFields: {'healthcare', 'nursing', 'care'},
-      community: 'Retired nurse',
-      bio: 'Gentle, steady guidance from someone who has supported people through change for decades.',
-    ),
-    CommunityMember(
-      id: 'malik-care-community',
-      name: 'Malik',
-      role: UserRole.sharer,
-      ageBand: AgeBand.older,
-      adviceTopics: {AdviceTopic.personalRelationships, AdviceTopic.careerAdvice},
-      supportStyles: {SupportStyle.blunt, SupportStyle.both},
-      experienceTags: {'care community', 'family dynamics', 'work-life balance'},
-      careerFields: {'community work', 'care', 'social services'},
-      community: 'Care community mentor',
-      bio: 'Direct advice from a long-time community organiser who has seen a lot and says what matters.',
-    ),
-    CommunityMember(
-      id: 'sandra-retiree',
-      name: 'Sandra',
-      role: UserRole.sharer,
-      ageBand: AgeBand.older,
-      adviceTopics: {AdviceTopic.socialLife, AdviceTopic.careerAdvice},
-      supportStyles: {SupportStyle.empathetic},
-      experienceTags: {'retired', 'career change', 'new chapters'},
-      careerFields: {'education', 'teaching', 'mentorship'},
-      community: 'Retired teacher',
-      bio: 'A calm listener with a lot of life experience and practical wisdom about big transitions.',
-    ),
-    CommunityMember(
-      id: 'jay-young-peer',
-      name: 'Jay',
-      role: UserRole.seeker,
-      ageBand: AgeBand.youngAdult,
-      adviceTopics: {AdviceTopic.careerAdvice, AdviceTopic.socialLife},
-      supportStyles: {SupportStyle.both},
-      experienceTags: {'first job', 'moving cities', 'building confidence'},
-      careerFields: {'tech', 'product', 'startup'},
-      community: 'Peer seeker',
-      bio: 'A younger user looking for advice, but also able to swap notes on the same stage of life.',
-    ),
-    CommunityMember(
-      id: 'nina-young-peer',
-      name: 'Nina',
-      role: UserRole.seeker,
-      ageBand: AgeBand.youngAdult,
-      adviceTopics: {AdviceTopic.personalRelationships, AdviceTopic.socialLife},
-      supportStyles: {SupportStyle.empathetic, SupportStyle.both},
-      experienceTags: {'relationships', 'social anxiety', 'new city'},
-      careerFields: {'healthcare', 'community work'},
-      community: 'Peer seeker',
-      bio: 'Wants conversation with people who understand the same life stage and can trade advice both ways.',
-    ),
-  ];
+  if (currentUser == null) {
+    return [];
+  }
 
-  List<MatchResult> recommend(UserPreferences preferences, {int limit = 4}) {
-    final results = _community
+  final response = await _supabase
+      .from('profiles')
+      .select()
+      .neq('id', currentUser.id);
+
+  return List<Map<String, dynamic>>.from(response);
+}
+  Future<List<CommunityMember>> getCommunityMembers() async {
+  final currentUser = _supabase.auth.currentUser;
+
+  if (currentUser == null) {
+    return [];
+  }
+
+  final response = await _supabase
+      .from('profiles')
+      .select()
+      .eq('onboarding_complete', true)
+      .neq('id', currentUser.id);
+
+  return response
+      .map<CommunityMember>(
+        (profile) => CommunityMember.fromProfile(profile),
+      )
+      .toList();
+}
+
+  Future<List<MatchResult>> recommend(UserPreferences preferences, {int limit = 4}) async {
+    final members = await instance.getCommunityMembers();
+    final results = members
         .map((member) => _score(preferences, member))
         .where((result) => result.score > 0)
         .toList()

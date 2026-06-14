@@ -7,6 +7,7 @@ import '../services/discussion_service.dart';
 import '../services/match_service.dart';
 import 'discussion_chatroom_screen.dart';
 import '../services/discussion_service_v2.dart';
+import '../widgets/app_navigation_bar.dart';
 
 class DiscussionTrackerScreen extends StatefulWidget {
   const DiscussionTrackerScreen({super.key, this.initialMatch});
@@ -82,6 +83,7 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
           );
         },
       ),
+      bottomNavigationBar: const AppNavigationBar(currentIndex: 1),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openTopicDialog(context),
         icon: const Icon(Icons.add),
@@ -91,7 +93,7 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
   }
 
   Future<void> _openTopicDialog(BuildContext context, {CommunityMember? initialMatch}) async {
-    final matches = MatchService.instance.communityMembers;
+    final matches = await MatchService.instance.getCommunityMembers();
     final draft = await showDialog<_TopicDraft>(
       context: context,
       builder: (context) => _TopicDialog(

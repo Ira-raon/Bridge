@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/match_profile.dart';
-import 'discussion_tracker_screen.dart';
 import '../services/profile_service.dart';
-import 'life_library_screen.dart';
 import 'platform_screen.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -93,7 +91,7 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
       preferences,
     );
 
-    if (!mounted) return;
+    if (!context.mounted) return;
 
     if (widget.isEditing) {
     Navigator.of(context).pop();
@@ -131,28 +129,6 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile setup'),
-        actions: [
-          IconButton(
-            tooltip: 'Discussion tracker',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const DiscussionTrackerScreen()),
-            ),
-            icon: const Icon(Icons.route_rounded),
-          ),
-          IconButton(
-            tooltip: 'Life library',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => LifeLibraryScreen(
-                  currentUser: _nameController.text.trim().isEmpty
-                      ? 'New Bridge member'
-                      : _nameController.text.trim(),
-                ),
-              ),
-            ),
-            icon: const Icon(Icons.menu_book_rounded),
-          ),
-        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),

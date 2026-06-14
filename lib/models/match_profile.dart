@@ -95,6 +95,7 @@ class CommunityMember {
     required this.careerFields,
     required this.community,
     required this.bio,
+    
   });
 
   final String id;
@@ -107,6 +108,51 @@ class CommunityMember {
   final Set<String> careerFields;
   final String community;
   final String bio;
+
+  factory CommunityMember.fromProfile(
+  Map<String, dynamic> json,
+) {
+  return CommunityMember(
+    id: json['id'],
+    name: json['display_name'] ?? 'Bridge Member',
+
+    role: UserRole.values.firstWhere(
+      (e) => e.name == json['role'],
+      orElse: () => UserRole.seeker,
+    ),
+
+    ageBand: AgeBand.youngAdult,
+
+    adviceTopics: (json['advice_topics'] as List?)
+            ?.map(
+              (e) => AdviceTopic.values.firstWhere(
+                (topic) => topic.name == e,
+              ),
+            )
+            .toSet() ??
+        {},
+
+    supportStyles: (json['support_styles'] as List?)
+            ?.map(
+              (e) => SupportStyle.values.firstWhere(
+                (style) => style.name == e,
+              ),
+            )
+            .toSet() ??
+        {},
+
+    experienceTags: {},
+
+    careerFields: {
+      if (json['career_field'] != null)
+        json['career_field'].toString().toLowerCase(),
+    },
+
+    community: 'Bridge Member',
+
+    bio: json['additional_notes'] ?? '',
+  );
+}
 }
 
 class MatchResult {

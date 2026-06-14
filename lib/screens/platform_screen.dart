@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/match_profile.dart';
 import '../services/match_service.dart';
 import 'life_library_screen.dart';
-import 'discussion_tracker_screen.dart';
-import 'profile_setup_screen.dart';
-import 'profile_screen.dart';
+import '../widgets/app_navigation_bar.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -33,45 +31,7 @@ class _PlatformScreenState extends State<PlatformScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-    currentIndex: 0,
-    onTap: (index) {
-      switch (index) {
-        case 0:
-         break;
-
-        case 1:
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const DiscussionTrackerScreen(),
-            ),
-          );
-          break;
-
-        case 2:
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const ProfileScreen(),
-            ),
-          );
-          break;
-      }
-    },
-    items: const [
-      BottomNavigationBarItem(
-        icon: Icon(Icons.home_rounded),
-        label: 'Home',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.chat_rounded),
-        label: 'Discussions',
-      ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.person_rounded),
-        label: 'Profile',
-      ),
-    ],
-  ),
+      bottomNavigationBar: const AppNavigationBar(currentIndex: 0),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
@@ -143,9 +103,6 @@ class _RecommendedMatchesSection extends StatelessWidget {
       lifeExperiences: {},
     );
 
-    final matches =
-        MatchService.instance.recommend(effectivePreferences);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -154,23 +111,39 @@ class _RecommendedMatchesSection extends StatelessWidget {
           subtitle: 'Ranked by shared topic, tone, and experience.',
         ),
         const SizedBox(height: 14),
+        FutureBuilder<List<MatchResult>>(
+          future: MatchService.instance.recommend(effectivePreferences),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
 
-        if (matches.isEmpty)
-          const _EmptyMatchesCard()
-        else
-          Column(
-            children: matches
-                .map(
-                  (match) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _MatchCard(
-                      match: match,
-                      onPlanTopic: () {},
+            if (snapshot.hasError) {
+              return const _EmptyMatchesCard();
+            }
+
+            final matches = snapshot.data ?? [];
+            if (matches.isEmpty) {
+              return const _EmptyMatchesCard();
+            }
+
+            return Column(
+              children: matches
+                  .map(
+                    (match) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _MatchCard(
+                        match: match,
+                        onPlanTopic: () {},
+                      ),
                     ),
-                  ),
-                )
-                .toList(),
-          ),
+                  )
+                  .toList(),
+            );
+          },
+        ),
       ],
     );
   }

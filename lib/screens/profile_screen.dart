@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import 'auth_screen.dart';
 import 'profile_setup_screen.dart';
+import '../widgets/app_navigation_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -146,11 +147,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             spacing: 12,
             runSpacing: 12,
             children: [
-              FilledButton.icon(
-                onPressed: _openProfileSetup,
-                icon: const Icon(Icons.edit),
-                label: const Text('Edit preferences'),
-              ),
               FilledButton.tonalIcon(
                 onPressed: () async {
                   await AuthService().signOut();
@@ -171,6 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const AppNavigationBar(currentIndex: 2),
     );
   }
 
@@ -231,7 +228,6 @@ class _ProfileHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final displayName = (profile?['display_name'] ?? 'Bridge member').toString();
     final email = (profile?['email'] ?? Supabase.instance.client.auth.currentUser?.email ?? '').toString();
     final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'B';
@@ -278,27 +274,6 @@ class _ProfileHero extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white.withValues(alpha: 0.86),
                         ),
-                  ),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      Chip(
-                        label: const Text('Bridge member'),
-                        backgroundColor: Colors.white.withValues(alpha: 0.14),
-                        side: BorderSide.none,
-                        labelStyle: const TextStyle(color: Colors.white),
-                      ),
-                      Chip(
-                        label: Text(
-                          'Theme aligned',
-                          style: TextStyle(color: scheme.primary),
-                        ),
-                        backgroundColor: Colors.white,
-                        side: BorderSide.none,
-                      ),
-                    ],
                   ),
                 ],
               ),
