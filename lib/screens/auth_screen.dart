@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'platform_screen.dart';
+import '../services/profile_service.dart';
 
 import 'profile_screen.dart';
 
@@ -52,11 +54,16 @@ void dispose() {
       );
     }
 
-    if (!mounted) return;
+    final hasCompletedProfile =
+    await ProfileService.instance.profileExists();
 
+    if (!mounted) return;
+    
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => const ProfileScreen(),
+        builder: (_) => hasCompletedProfile
+            ? const PlatformScreen()
+            : const ProfileScreen(),
       ),
     );
   } catch (e) {

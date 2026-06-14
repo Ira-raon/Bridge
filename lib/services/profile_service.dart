@@ -38,4 +38,23 @@ class ProfileService {
       'onboarding_complete': true,
     }).eq('id', user.id);
   }
+  Future<bool> profileExists() async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) {
+     return false;
+    }
+
+    final response = await _supabase
+        .from('profiles')
+        .select('onboarding_complete')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (response == null) {
+      return false;
+    }
+
+    return response['onboarding_complete'] == true;
+  }
 }

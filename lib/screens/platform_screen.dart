@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/discussion_service_v2.dart';
-import '../models/discussion_topic.dart';
 import '../models/match_profile.dart';
-import '../services/discussion_service.dart';
 import '../services/match_service.dart';
-import 'discussion_chatroom_screen.dart';
 import 'life_library_screen.dart';
 
 class PlatformScreen extends StatefulWidget {
