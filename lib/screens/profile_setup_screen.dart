@@ -7,7 +7,12 @@ import 'life_library_screen.dart';
 import 'platform_screen.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
-  const ProfileSetupScreen({super.key});
+  const ProfileSetupScreen({
+    super.key,
+    this.isEditing = false,
+  });
+
+  final bool isEditing;
 
   @override
   State<ProfileSetupScreen> createState() => _ProfileScreenState();
@@ -90,11 +95,15 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
 
     if (!mounted) return;
 
+    if (widget.isEditing) {
+    Navigator.of(context).pop();
+  } else {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
+     MaterialPageRoute<void>(
         builder: (_) => const PlatformScreen(),
       ),
     );
+}
   } catch (e) {
     if (!mounted) return;
 
@@ -297,7 +306,11 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
           FilledButton.icon(
             onPressed: () => _openPlatform(context),
             icon: const Icon(Icons.arrow_forward_rounded),
-            label: const Text('Continue to exchange platform'),
+            label: Text(
+                widget.isEditing
+                  ? 'Save Profile'
+                  : 'Continue to Exchange Platform',
+          ),
           ),
         ],
       ),

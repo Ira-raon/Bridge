@@ -60,15 +60,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          Text(
-            _profile?['display_name'] ?? 'Bridge Member',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            _profile?['email'] ?? '',
+          Card(
+            child: Padding(
+                padding: const EdgeInsets.all(24),
+                  child: Column(
+                     children: [
+                      CircleAvatar(
+                         radius: 36,
+                          child: Text(
+                           (_profile?['display_name'] ?? 'B')
+                               .substring(0, 1)
+                               .toUpperCase(),
+                             ),
+                      ),
+               const SizedBox(height: 12),
+                Text(
+                  _profile?['display_name'] ?? 'Bridge Member',
+                    style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall,
+                ),
+                Text(
+                  _profile?['email'] ?? '',
+                ),
+                ],
+              ),
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -80,29 +97,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 12),
-
-          ListTile(
-            title: const Text('Role'),
-            subtitle: Text(
-              _profile?['role'] ?? 'Not set',
+          Chip(
+          label: 
+            Text('Role: ${
+              _profile?['role'] ?? 'Not set'
+              }'
             ),
           ),
-
-          ListTile(
-            title: const Text('Career Field'),
-            subtitle: Text(
-              _profile?['career_field'] ?? 'Not set',
-            ),
+           Chip(
+            label: Text('Career Field: ${_profile?['career_field'] ?? 'Not set'}'),
           ),
+            
 
-          ListTile(
-            title: const Text('Experience Preference'),
-            subtitle: Text(
-              _profile?['experience_preference'] ?? 'Not set',
-            ),
-          ),
+          Chip(label: Text('Experience Preference: ${_profile?['experience_preference'] ?? 'Not set'}'),),
+          Chip(label: Text('Prefer Same Career Field: ${_profile?['prefer_same_career_field'] ?? 'Not set'}'),),
+          Chip(label: Text('Advice Topics: ${(_profile?['advice_topics'] as List<dynamic>?)?.join(', ') ?? 'Not set'}'),),
+          Chip(label: Text('Support Styles: ${(_profile?['support_styles'] as List<dynamic>?)?.join(', ') ?? 'Not set'}'),),
+          Chip(label: Text('Life Experiences: ${(_profile?['life_experiences'] as List<dynamic>?)?.join(', ') ?? 'Not set'}'),),
 
           const SizedBox(height: 24),
 
@@ -110,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => const ProfileSetupScreen(),
+                  builder: (_) => const ProfileSetupScreen(isEditing: true,),
                 ),
               );
             },
