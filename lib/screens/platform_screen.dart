@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/match_profile.dart';
 import '../services/match_service.dart';
 import 'life_library_screen.dart';
+import 'discussion_tracker_screen.dart';
+import 'profile_screen.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -30,31 +32,45 @@ class _PlatformScreenState extends State<PlatformScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dynamic_feed_outlined),
-            selectedIcon: Icon(Icons.dynamic_feed_rounded),
-            label: 'Feed',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.search_outlined),
-            selectedIcon: Icon(Icons.search_rounded),
-            label: 'Explore',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline_rounded),
-            selectedIcon: Icon(Icons.chat_bubble_rounded),
-            label: 'Messages',
-          ),
-        ],
+      bottomNavigationBar: BottomNavigationBar(
+    currentIndex: 0,
+    onTap: (index) {
+      switch (index) {
+        case 0:
+         break;
+
+        case 1:
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const DiscussionTrackerScreen(),
+            ),
+          );
+          break;
+
+        case 2:
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const ProfileScreen(),
+            ),
+          );
+          break;
+      }
+    },
+    items: const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home_rounded),
+        label: 'Home',
       ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.chat_rounded),
+        label: 'Discussions',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.person_rounded),
+        label: 'Profile',
+      ),
+    ],
+  ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [

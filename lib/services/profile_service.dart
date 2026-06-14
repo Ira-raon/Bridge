@@ -57,4 +57,17 @@ class ProfileService {
 
     return response['onboarding_complete'] == true;
   }
+  Future<Map<String, dynamic>?> getCurrentProfile() async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) {
+      return null;
+    }
+
+    return await _supabase
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .single();
+  }
 }

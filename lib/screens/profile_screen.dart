@@ -14,7 +14,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _nameController = TextEditingController(text: 'New Bridge member');
+  bool _loadingProfile = true;
+  final _nameController = TextEditingController();
   final _shareController = TextEditingController();
   final _careerFieldController = TextEditingController();
   final Set<AdviceTopic> _selectedTopics = {AdviceTopic.careerAdvice};
@@ -23,6 +24,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserRole _selectedRole = UserRole.seeker;
   // bool _premiumAccess = false;
   bool _preferSameCareerField = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final profile =
+        await ProfileService.instance.getCurrentProfile();
+
+    if (profile == null) {
+      return;
+    }
+
+    _nameController.text =
+      profile['display_name'] ?? '';
+
+    _careerFieldController.text =
+      profile['career_field'] ?? '';
+
+    _shareController.text =
+        profile['additional_notes'] ?? '';
+
+    if (mounted) {
+      setState(() {
+        _loadingProfile = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -81,6 +112,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loadingProfile) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile setup'),
