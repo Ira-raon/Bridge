@@ -57,17 +57,61 @@ class ProfileService {
 
     return response['onboarding_complete'] == true;
   }
-  Future<Map<String, dynamic>?> getCurrentProfile() async {
+  Future<UserPreferences?> getCurrentProfile() async {
     final user = _supabase.auth.currentUser;
-
+  
     if (user == null) {
       return null;
     }
-
-    return await _supabase
+  
+    final response = await _supabase
         .from('profiles')
         .select()
         .eq('id', user.id)
         .single();
+  
+    return UserPreferences(
+      displayName: response['display_name'] ?? 'Bridge Member',
+  
+      role: UserRole.values.firstWhere(
+        (e) => e.name == response['role'],
+        orElse: () => UserRole.seeker,
+      ),
+  
+      adviceTopics: (response['advice_topics'] as List?)
+              ?.map(
+                (e) => AdviceTopic.values.firstWhere(
+                  (topic) => topic.name == e,
+                ),
+              )
+              .toSet() ??
+          {},
+  
+      supportStyles: (response['support_styles'] as List?)
+              ?.map(
+                (e) => SupportStyle.values.firstWhere(
+                  (style) => style.name == e,
+                ),
+              )
+              .toSet() ??
+          {},
+  
+      experiencePreference:
+          ExperiencePreference.values.firstWhere(
+        (e) => e.name == response['experience_preference'],
+        orElse: () =>
+            ExperiencePreference.sameExperience,
+      ),
+  
+      careerField: response['career_field'] ?? '',
+  
+      preferSameCareerField:
+          response['prefer_same_career_field'] ?? false,
+  
+      additionalNotes:
+          response['additional_notes'] ?? '',
+  
+      lifeExperiences: const {},
+    );
   }
 }

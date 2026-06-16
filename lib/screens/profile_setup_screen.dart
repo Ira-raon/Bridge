@@ -42,14 +42,11 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
       return;
     }
 
-    _nameController.text =
-      profile['display_name'] ?? '';
+    _nameController.text = profile.displayName;
 
-    _careerFieldController.text =
-      profile['career_field'] ?? '';
+    _careerFieldController.text = profile.careerField;
 
-    _shareController.text =
-        profile['additional_notes'] ?? '';
+    _shareController.text = profile.additionalNotes;
 
     if (mounted) {
       setState(() {

@@ -3,6 +3,7 @@ import '../models/match_profile.dart';
 import '../services/match_service.dart';
 import 'life_library_screen.dart';
 import '../widgets/app_navigation_bar.dart';
+import '../services/profile_service.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -88,31 +89,43 @@ class _PlatformScreenState extends State<PlatformScreen> {
 class _RecommendedMatchesSection extends StatelessWidget {
   const _RecommendedMatchesSection();
 
-  @override
-  Widget build(BuildContext context) {
-    const effectivePreferences = UserPreferences(
-      displayName: 'Bridge member',
-     // premium: false,
-      role: UserRole.seeker,
-      adviceTopics: {AdviceTopic.careerAdvice},
-      supportStyles: {SupportStyle.empathetic},
-      experiencePreference: ExperiencePreference.sameExperience,
-      careerField: '',
-      preferSameCareerField: false,
-      additionalNotes: '',
-      lifeExperiences: {},
-    );
+@override
+Widget build(BuildContext context) {
+  return FutureBuilder<UserPreferences?>(
+    future: ProfileService.instance.getCurrentProfile(),
+    builder: (context, profileSnapshot) {
+      if (profileSnapshot.connectionState ==
+          ConnectionState.waiting) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionHeader(
-          title: 'Recommended matches',
-          subtitle: 'Ranked by shared topic, tone, and experience.',
-        ),
-        const SizedBox(height: 14),
-        FutureBuilder<List<MatchResult>>(
-          future: MatchService.instance.recommend(effectivePreferences),
+      if (profileSnapshot.hasError) {
+        return const _EmptyMatchesCard();
+      }
+
+      final preferences = profileSnapshot.data;
+
+      if (preferences == null) {
+        return const _EmptyMatchesCard();
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const _SectionHeader(
+            title: 'Recommended matches',
+            subtitle:
+                'Ranked by shared topic, tone, and experience.',
+          ),
+
+          const SizedBox(height: 14),
+
+          FutureBuilder<List<MatchResult>>(
+            future: MatchService.instance.recommend(
+              preferences,
+            ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -146,7 +159,8 @@ class _RecommendedMatchesSection extends StatelessWidget {
         ),
       ],
     );
-  }
+  });
+}
 }
 class _MatchCard extends StatelessWidget {
   const _MatchCard({required this.match, required this.onPlanTopic});
