@@ -51,7 +51,11 @@ class MatchService {
         .toList()
       ..sort((a, b) => b.score.compareTo(a.score));
 
+      print(members);
+print(results);
+
     return results.take(limit).toList();
+    
   }
 
   MatchResult _score(UserPreferences preferences, CommunityMember member) {
