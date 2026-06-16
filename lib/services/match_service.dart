@@ -30,18 +30,32 @@ class MatchService {
     return [];
   }
 
-  final response = await _supabase
-      .from('profiles')
-      .select()
-      .eq('onboarding_complete', true)
-      .neq('id', currentUser.id);
+  final response = await _supabase 
+    .from('profiles')
+    .select('''
+      id,
+      display_name,
+      role,
+      advice_topics,
+      support_styles,
+      career_field,
+      additional_notes,
+      onboarding_complete
+    ''')
+    .eq('onboarding_complete', true)
+    .neq('id', currentUser.id);
+
+
+print(response);
 
   return response
       .map<CommunityMember>(
         (profile) => CommunityMember.fromProfile(profile),
       )
       .toList();
+      
 }
+
 
   Future<List<MatchResult>> recommend(UserPreferences preferences, {int limit = 4}) async {
     final members = await instance.getCommunityMembers();
