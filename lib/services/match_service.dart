@@ -70,21 +70,28 @@ class MatchService {
       reasons.add('Preferred tone: ${styleOverlap.first.label.toLowerCase()}');
     }
 
-    if (member.role == UserRole.sharer) {
-      score += 30;
-      reasons.add('Older sharer');
-      if (member.ageBand == AgeBand.older) {
-        score += 18;
-      }
-      // } else if (preferences.premium) {
-      //   score += 10;
-      //   reasons.add('Premium peer match');
-      //   if (member.ageBand == AgeBand.youngAdult) {
-      //     score += 6;
-      //   }
-    } else {
-      score -= 100;
-    }
+    final myRole = preferences.role;
+final theirRole = member.role;
+
+bool compatible = false;
+
+if (myRole == UserRole.both ||
+    theirRole == UserRole.both) {
+  compatible = true;
+} else if (myRole == UserRole.seeker &&
+           theirRole == UserRole.sharer) {
+  compatible = true;
+} else if (myRole == UserRole.sharer &&
+           theirRole == UserRole.seeker) {
+  compatible = true;
+}
+
+if (compatible) {
+  score += 30;
+  reasons.add('Compatible roles');
+} else {
+  score = 0;
+}
 
     if (preferences.experiencePreference == ExperiencePreference.sameExperience) {
       final sharedExperience = member.experienceTags.any(

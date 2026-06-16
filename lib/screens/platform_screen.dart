@@ -89,78 +89,78 @@ class _PlatformScreenState extends State<PlatformScreen> {
 class _RecommendedMatchesSection extends StatelessWidget {
   const _RecommendedMatchesSection();
 
-@override
-Widget build(BuildContext context) {
-  return FutureBuilder<UserPreferences?>(
-    future: ProfileService.instance.getCurrentProfile(),
-    builder: (context, profileSnapshot) {
-      if (profileSnapshot.connectionState ==
-          ConnectionState.waiting) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<UserPreferences?>(
+      future: ProfileService.instance.getCurrentProfile(),
+      builder: (context, profileSnapshot) {
+        if (profileSnapshot.connectionState ==
+            ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-      if (profileSnapshot.hasError) {
-        return const _EmptyMatchesCard();
-      }
+        final preferences = profileSnapshot.data;
 
-      final preferences = profileSnapshot.data;
+        if (preferences == null) {
+          return const _EmptyMatchesCard();
+        }
 
-      if (preferences == null) {
-        return const _EmptyMatchesCard();
-      }
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const _SectionHeader(
-            title: 'Recommended matches',
-            subtitle:
-                'Ranked by shared topic, tone, and experience.',
-          ),
-
-          const SizedBox(height: 14),
-
-          FutureBuilder<List<MatchResult>>(
-            future: MatchService.instance.recommend(
-              preferences,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionHeader(
+              title: 'Recommended matches',
+              subtitle:
+                  'Ranked by shared topic, tone, and experience.',
             ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+            const SizedBox(height: 14),
 
-            if (snapshot.hasError) {
-              return const _EmptyMatchesCard();
-            }
+            FutureBuilder<List<MatchResult>>(
+              future: MatchService.instance.recommend(
+                preferences,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
 
-            final matches = snapshot.data ?? [];
-            if (matches.isEmpty) {
-              return const _EmptyMatchesCard();
-            }
+                if (snapshot.hasError) {
+                  return const _EmptyMatchesCard();
+                }
 
-            return Column(
-              children: matches
-                  .map(
-                    (match) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _MatchCard(
-                        match: match,
-                        onPlanTopic: () {},
-                      ),
-                    ),
-                  )
-                  .toList(),
-            );
-          },
-        ),
-      ],
+                final matches = snapshot.data ?? [];
+
+                if (matches.isEmpty) {
+                  return const _EmptyMatchesCard();
+                }
+
+                return Column(
+                  children: matches.map(
+                    (match) {
+                      return Padding(
+                        padding:
+                            const EdgeInsets.only(bottom: 12),
+                        child: _MatchCard(
+                          match: match,
+                          onPlanTopic: () {},
+                        ),
+                      );
+                    },
+                  ).toList(),
+                  
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
-  });
-}
+  }
 }
 class _MatchCard extends StatelessWidget {
   const _MatchCard({required this.match, required this.onPlanTopic});
