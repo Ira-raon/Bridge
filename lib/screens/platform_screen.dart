@@ -6,6 +6,7 @@ import '../widgets/app_navigation_bar.dart';
 import '../services/profile_service.dart';
 import '../services/connection_service.dart';
 import 'notifications_screen.dart';
+import 'discussion_tracker_screen.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -31,89 +32,77 @@ class _PlatformScreenState extends State<PlatformScreen> {
            Padding(
             padding: EdgeInsets.only(right: 16),
             child: IconButton(
-                    onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => NotificationsScreen(),
-      ),
-    );
-  },
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                      builder: (_) => NotificationsScreen(),
+                      ),
+                    );
+                     if (mounted) {
+                        setState(() {});
+                      }
+                   },
                       icon: FutureBuilder<List<Map<String, dynamic>>>(
-  future: ConnectionService.instance
-      .getPendingRequests(),
-  builder: (context, snapshot) {
+                        future: ConnectionService.instance
+                            .getPendingRequests(),
+                        builder: (context, snapshot) {
+                        
+                          final count =
+                              snapshot.data?.length ?? 0;
 
-    final count =
-        snapshot.data?.length ?? 0;
+                          return Stack(
+                            children: [
+                            
+                              const Icon(
+                                Icons.notifications,
+                              ),
 
-    return Stack(
-      children: [
-
-        const Icon(
-          Icons.notifications,
-        ),
-
-        if (count > 0)
-          Positioned(
-            right: 0,
-            top: 0,
-            child: CircleAvatar(
-              radius: 8,
-              child: Text(
-                '$count',
-                style: const TextStyle(
-                  fontSize: 10,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  },
-)
+                              if (count > 0)
+                                Positioned(
+                                  right: 0,
+                                  top: 0,
+                                  child: CircleAvatar(
+                                    radius: 8,
+                                    child: Text(
+                                      '$count',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      )
                       ),
           ),
         ],
       ),
       bottomNavigationBar: const AppNavigationBar(currentIndex: 0),
       body: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          _PlatformHero(selectedIndex: selectedIndex),
-          const SizedBox(height: 18),
-          const _RecommendedMatchesSection(),
-          const SizedBox(height: 18),
-          const _SectionHeader(
-            title: 'Open exchanges',
-            subtitle: 'Requests that match your profile and interests.',
-          ),
-          const SizedBox(height: 18),
-          const _SectionHeader(
-            title: 'Post a new exchange',
-            subtitle: 'Start a conversation with a clear offer and request.',
-          ),
-          const SizedBox(height: 14),
-          const TextField(
-            decoration: InputDecoration(
-              labelText: 'What are you offering?',
-            ),
-          ),
-          const SizedBox(height: 12),
-          const TextField(
-            decoration: InputDecoration(
-              labelText: 'What are you looking for?',
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.send_rounded),
-            label: const Text('Publish exchange'),
-          ),
-        ],
-      ),
+  padding: const EdgeInsets.all(24),
+  children: [
+    _PlatformHero(selectedIndex: selectedIndex),
+
+    const SizedBox(height: 18),
+
+    const _RecommendedMatchesSection(),
+
+    const SizedBox(height: 18),
+
+    const _ActiveDiscussionsPreview(),
+
+    const SizedBox(height: 18),
+
+    const _SavedMomentsPreview(),
+
+    const SizedBox(height: 18),
+
+    const _QuickActionsSection(),
+  ],
+),
     );
   }
 }
@@ -462,6 +451,131 @@ class _ExchangeCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+class _ActiveDiscussionsPreview extends StatelessWidget {
+  const _ActiveDiscussionsPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionHeader(
+          title: 'Active discussions',
+          subtitle: 'Continue conversations that matter.',
+        ),
+
+        const SizedBox(height: 12),
+
+        Card(
+          child: ListTile(
+            title: const Text('No active discussions yet'),
+            subtitle: const Text(
+              'Plan a topic to begin your first discussion.',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const DiscussionTrackerScreen(),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+class _SavedMomentsPreview extends StatelessWidget {
+  const _SavedMomentsPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionHeader(
+          title: 'Saved moments',
+          subtitle: 'Words and lessons worth keeping.',
+        ),
+
+        const SizedBox(height: 12),
+
+        Card(
+          child: ListTile(
+            title: const Text('Nothing saved yet'),
+            subtitle: const Text(
+              'Save advice from chats and stories.',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              // Saved Moments screen later
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+class _QuickActionsSection extends StatelessWidget {
+  const _QuickActionsSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _SectionHeader(
+          title: 'Quick actions',
+          subtitle: 'Jump to what you need.',
+        ),
+
+        const SizedBox(height: 12),
+
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const LifeLibraryScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.menu_book_rounded),
+              label: const Text('Life Library'),
+            ),
+
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const DiscussionTrackerScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.chat_bubble_outline),
+              label: const Text('Discussions'),
+            ),
+
+            FilledButton.icon(
+              onPressed: () {
+                // Connections screen later
+              },
+              icon: const Icon(Icons.people_outline),
+              label: const Text('Connections'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
