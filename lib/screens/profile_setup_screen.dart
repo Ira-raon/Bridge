@@ -23,6 +23,8 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
   final _careerFieldController = TextEditingController();
   final Set<AdviceTopic> _selectedTopics = {AdviceTopic.careerAdvice};
   final Set<SupportStyle> _selectedStyles = {SupportStyle.empathetic};
+  LifeStage _lifeStage = LifeStage.preferNotToSay;
+  DateTime? _selectedDob;
   ExperiencePreference _experiencePreference = ExperiencePreference.sameExperience;
   UserRole _selectedRole = UserRole.seeker;
   // bool _premiumAccess = false;
@@ -39,14 +41,33 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
         await ProfileService.instance.getCurrentProfile();
 
     if (profile == null) {
+      if (mounted) {
+        setState(() {
+          _loadingProfile = false;
+        });
+      }
+
       return;
     }
 
     _nameController.text = profile.displayName;
-
     _careerFieldController.text = profile.careerField;
-
     _shareController.text = profile.additionalNotes;
+    _selectedRole = profile.role;
+    _selectedTopics
+      ..clear()
+      ..addAll(profile.adviceTopics.isEmpty
+          ? {AdviceTopic.careerAdvice}
+          : profile.adviceTopics);
+    _selectedStyles
+      ..clear()
+      ..addAll(profile.supportStyles.isEmpty
+          ? {SupportStyle.empathetic}
+          : profile.supportStyles);
+    _experiencePreference = profile.experiencePreference;
+    _preferSameCareerField = profile.preferSameCareerField;
+    _selectedDob = profile.dateOfBirth;
+    _lifeStage = profile.lifeStage;
 
     if (mounted) {
       setState(() {
@@ -81,6 +102,8 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
     preferSameCareerField: _preferSameCareerField,
     additionalNotes: _shareController.text.trim(),
     lifeExperiences: const {},
+    lifeStage: _lifeStage,
+    dateOfBirth: _selectedDob,
   );
 
   try {
@@ -135,31 +158,92 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
             subtitle: 'First-time setup helps Bridge connect you with the right people.',
           ),
           const SizedBox(height: 20),
-          _ProfileCard(nameController: _nameController),
+          if (widget.isEditing)
+            _ProfileSummaryCard(dateOfBirth: _selectedDob)
+          else
+            _ProfileCard(nameController: _nameController),
           const SizedBox(height: 18),
-          const _PreferenceLabel(
-          title: 'What best describes you?',
-           subtitle: 'This helps Bridge know how you want to participate.',
-             ),
-         const SizedBox(height: 12),
+          if (!widget.isEditing) ...[
+            const _PreferenceLabel(
+              title: 'What best describes you?',
+              subtitle: 'This helps Bridge know how you want to participate.',
+            ),
+            const SizedBox(height: 12),
+            SegmentedButton<UserRole>(
+              segments: UserRole.values
+                  .map(
+                    (role) => ButtonSegment<UserRole>(
+                      value: role,
+                      label: Text(role.label),
+                    ),
+                  )
+                  .toList(),
+              selected: {_selectedRole},
+              onSelectionChanged: (selection) {
+                setState(() {
+                  _selectedRole = selection.first;
+                });
+              },
+            ),
+            const SizedBox(height: 18),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Date of birth'),
+              subtitle: Text(
+                _selectedDob == null
+                    ? 'Select date of birth'
+                    : '${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}',
+              ),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDob ?? DateTime(2000),
+                  firstDate: DateTime(1920),
+                  lastDate: DateTime.now(),
+                );
 
-          SegmentedButton<UserRole>(
-           segments: UserRole.values
-             .map(
-               (role) => ButtonSegment<UserRole>(
-               value: role,
-               label: Text(role.label),
-             ),
-           )
-            .toList(),
-             selected: {_selectedRole},
-           onSelectionChanged: (selection) {
-           setState(() {
-            _selectedRole = selection.first;
-            });
-          },
-         ),
-
+                if (picked != null) {
+                  setState(() {
+                    _selectedDob = picked;
+                  });
+                }
+              },
+            ),
+          ] else ...[
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Date of birth'),
+              subtitle: Text(
+                _selectedDob == null
+                    ? 'Not set'
+                    : '${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}',
+              ),
+              trailing: const Icon(Icons.lock_outline),
+            ),
+          ],
+          const SizedBox(height: 18),
+          DropdownButtonFormField<LifeStage>(
+            value: _lifeStage,
+            decoration: const InputDecoration(
+              labelText: 'Life stage',
+            ),
+            items: LifeStage.values
+                .map(
+                  (stage) => DropdownMenuItem(
+                    value: stage,
+                    child: Text(stage.label),
+                  ),
+                )
+                .toList(),
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _lifeStage = value;
+                });
+              }
+            },
+          ),
           const SizedBox(height: 18),
           const _PreferenceLabel(
             title: 'What are you looking for?',
@@ -234,18 +318,6 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
               });
             },
           ),
-          // const SizedBox(height: 18),
-          // SwitchListTile.adaptive(
-          //   contentPadding: EdgeInsets.zero,
-          //   value: _premiumAccess,
-          //   title: const Text('Premium matching'),
-          //   subtitle: const Text('Still prioritizes older sharers, but also unlocks strong peer-to-peer matches.'),
-          //   onChanged: (value) {
-          //     setState(() {
-          //       _premiumAccess = value;
-          //     });
-          //   },
-          // ),
           const SizedBox(height: 10),
           TextField(
             controller: _careerFieldController,
@@ -330,6 +402,37 @@ class _ProfileCard extends StatelessWidget {
                         ),
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileSummaryCard extends StatelessWidget {
+  const _ProfileSummaryCard({required this.dateOfBirth});
+
+  final DateTime? dateOfBirth;
+
+  @override
+  Widget build(BuildContext context) {
+    final dobText = dateOfBirth == null
+        ? 'Not set'
+        : '${dateOfBirth!.day}/${dateOfBirth!.month}/${dateOfBirth!.year}';
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Row(
+          children: [
+            const Icon(Icons.cake_outlined),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Date of birth: $dobText',
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ),
           ],

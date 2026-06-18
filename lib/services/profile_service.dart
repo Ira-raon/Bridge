@@ -36,7 +36,10 @@ class ProfileService {
       'additional_notes':
           preferences.additionalNotes,
       'onboarding_complete': true,
+      'life_stage': preferences.lifeStage.name,
+      'date_of_birth': preferences.dateOfBirth,
     }).eq('id', user.id);
+
   }
   Future<bool> profileExists() async {
     final user = _supabase.auth.currentUser;
@@ -112,6 +115,13 @@ class ProfileService {
           response['additional_notes'] ?? '',
   
       lifeExperiences: const {},
+      lifeStage: LifeStage.values.firstWhere(
+        (e) => e.name == response['life_stage'],
+        orElse: () => LifeStage.preferNotToSay,
+      ),
+      dateOfBirth: response['date_of_birth'] != null
+          ? DateTime.parse(response['date_of_birth'])
+          : null,
     );
   }
 }

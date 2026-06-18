@@ -8,6 +8,17 @@ enum UserRole {seeker, sharer, both,}
 
 enum AgeBand { youth, youngAdult, adult, older }
 
+enum LifeStage {
+  student,
+  earlyCareer,
+  midCareer,
+  careerTransition,
+  parentCaregiver,
+  retired,
+  exploring,
+  preferNotToSay,
+}
+
 enum LifeExperience {
   careerChange,
   entrepreneurship,
@@ -21,7 +32,6 @@ enum LifeExperience {
   healthChallenge,
 }
 
-enum LifeStage {student, earlyCareer, midCareer, retired}
 
 extension AdviceTopicLabel on AdviceTopic {
   String get label => switch (this) {
@@ -57,6 +67,19 @@ extension AgeBandLabel on AgeBand {
       };
 }
 
+extension LifeStageLabel on LifeStage {
+  String get label => switch (this) {
+        LifeStage.student => 'Student',
+        LifeStage.earlyCareer => 'Early Career',
+        LifeStage.midCareer => 'Mid Career',
+        LifeStage.careerTransition => 'Career Transition',
+        LifeStage.parentCaregiver => 'Parent/Caregiver',
+        LifeStage.retired => 'Retired',
+        LifeStage.exploring => 'Exploring What\'s Next',
+        LifeStage.preferNotToSay => 'Prefer Not To Say',
+      };
+}
+
 class UserPreferences {
   const UserPreferences({
     required this.displayName,
@@ -69,6 +92,8 @@ class UserPreferences {
     required this.preferSameCareerField,
     required this.additionalNotes,
     required this.lifeExperiences,
+    required this.lifeStage,
+    this.dateOfBirth,
   });
 
   final String displayName;
@@ -81,6 +106,8 @@ class UserPreferences {
   final bool preferSameCareerField;
   final Set<LifeExperience> lifeExperiences;
   final String additionalNotes;
+  final DateTime? dateOfBirth;
+  final LifeStage lifeStage;
 }
 
 class CommunityMember {

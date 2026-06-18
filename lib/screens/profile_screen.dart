@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/match_profile.dart';
 import '../services/auth_service.dart';
 import 'auth_screen.dart';
 import 'profile_setup_screen.dart';
@@ -90,6 +91,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           _ProfileHero(profile: _profile),
           const SizedBox(height: 18),
+          _DetailCard(
+            title: 'About you',
+            children: [
+              _DetailChip(label: 'Date of birth', value: _dateOfBirthValue()),
+              _DetailChip(label: 'Life stage', value: _lifeStageValue()),
+            ],
+          ),
+          const SizedBox(height: 12),
           if (_errorMessage != null) ...[
             Card(
               child: Padding(
@@ -197,6 +206,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return 'Not set';
+  }
+
+  String _dateOfBirthValue() {
+    final value = _profile?['date_of_birth'];
+
+    if (value == null) {
+      return 'Not set';
+    }
+
+    final dob = value is DateTime ? value : DateTime.tryParse(value.toString());
+
+    if (dob == null) {
+      return 'Not set';
+    }
+
+    return '${dob.day}/${dob.month}/${dob.year}';
+  }
+
+  String _lifeStageValue() {
+    final value = _profile?['life_stage'];
+
+    if (value == null) {
+      return 'Not set';
+    }
+
+    return LifeStage.values
+        .firstWhere(
+          (stage) => stage.name == value.toString(),
+          orElse: () => LifeStage.preferNotToSay,
+        )
+        .label;
   }
 
   List<Widget> _chipsForList(String key) {
