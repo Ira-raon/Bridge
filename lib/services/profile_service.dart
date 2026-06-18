@@ -37,7 +37,7 @@ class ProfileService {
           preferences.additionalNotes,
       'onboarding_complete': true,
       'life_stage': preferences.lifeStage.name,
-      'date_of_birth': preferences.dateOfBirth,
+      'date_of_birth': preferences.dateOfBirth?.toIso8601String(),
     }).eq('id', user.id);
 
   }
