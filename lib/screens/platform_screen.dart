@@ -4,6 +4,8 @@ import '../services/match_service.dart';
 import 'life_library_screen.dart';
 import '../widgets/app_navigation_bar.dart';
 import '../services/profile_service.dart';
+import '../services/connection_service.dart';
+import 'notifications_screen.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -26,9 +28,19 @@ class _PlatformScreenState extends State<PlatformScreen> {
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LifeLibraryScreen())),
             icon: const Icon(Icons.menu_book_rounded),
           ),
-          const Padding(
+           Padding(
             padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.notifications_none_rounded),
+            child: IconButton(
+                      icon:  Icon(Icons.notifications_none),
+                        onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                   builder: (_) => const NotificationsScreen(),
+                                ),
+                              );
+                            },
+                      ),
           ),
         ],
       ),
@@ -43,18 +55,6 @@ class _PlatformScreenState extends State<PlatformScreen> {
           const _SectionHeader(
             title: 'Open exchanges',
             subtitle: 'Requests that match your profile and interests.',
-          ),
-          const SizedBox(height: 14),
-          const _ExchangeCard(
-            title: 'Mentorship swap',
-            subtitle: 'Share career lessons in return for design feedback.',
-            tag: 'Active now',
-          ),
-          const SizedBox(height: 12),
-          const _ExchangeCard(
-            title: 'Local knowledge circle',
-            subtitle: 'Collect neighborhood tips and offer a process template.',
-            tag: '3 invites',
           ),
           const SizedBox(height: 18),
           const _SectionHeader(
@@ -243,21 +243,42 @@ class _MatchCard extends StatelessWidget {
                     label: const Text('Plan topic'),
                   ),
                   FilledButton.tonalIcon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Connection request sent to ${match.member.name}')),
-                      );
-                    },
-                    icon: const Icon(Icons.link_rounded),
                     label: const Text('Connect'),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                    icon: const Icon(Icons.link_rounded),
+                    onPressed: () async {
+  try {
+    await ConnectionService.instance.sendRequest(
+      match.member.id,
+    );
+
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Connection request sent to ${match.member.name}',
         ),
       ),
     );
+  } catch (e) {
+    if (!context.mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+      ),
+    );
+  }
+},
+                  
+                  ),
+                ],
+              ),
+              ),
+           ],
+          ),
+       ),
+    );    
   }
 }
 

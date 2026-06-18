@@ -38,9 +38,9 @@ class ProfileService {
       'onboarding_complete': true,
       'life_stage': preferences.lifeStage.name,
       'date_of_birth': preferences.dateOfBirth
-    ?.toIso8601String()
-    .split('T')
-    .first,
+                          ?.toIso8601String()
+                          .split('T')
+                          .first,
     }).eq('id', user.id);
 
   }
