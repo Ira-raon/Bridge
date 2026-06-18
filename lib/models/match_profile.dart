@@ -148,7 +148,10 @@ class CommunityMember {
       orElse: () => UserRole.seeker,
     ),
 
-    ageBand: AgeBand.youngAdult,
+    ageBand: AgeBand.values.firstWhere(
+  (e) => e.name == json['life_stage'],
+  orElse: () => AgeBand.youngAdult,
+),
 
     adviceTopics: (json['advice_topics'] as List?)
             ?.map(

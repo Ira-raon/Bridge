@@ -31,15 +31,47 @@ class _PlatformScreenState extends State<PlatformScreen> {
            Padding(
             padding: EdgeInsets.only(right: 16),
             child: IconButton(
-                      icon:  Icon(Icons.notifications_none),
-                        onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                   builder: (_) => const NotificationsScreen(),
-                                ),
-                              );
-                            },
+                    onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NotificationsScreen(),
+      ),
+    );
+  },
+                      icon: FutureBuilder<List<Map<String, dynamic>>>(
+  future: ConnectionService.instance
+      .getPendingRequests(),
+  builder: (context, snapshot) {
+
+    final count =
+        snapshot.data?.length ?? 0;
+
+    return Stack(
+      children: [
+
+        const Icon(
+          Icons.notifications,
+        ),
+
+        if (count > 0)
+          Positioned(
+            right: 0,
+            top: 0,
+            child: CircleAvatar(
+              radius: 8,
+              child: Text(
+                '$count',
+                style: const TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  },
+)
                       ),
           ),
         ],
