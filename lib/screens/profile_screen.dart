@@ -180,12 +180,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _openProfileSetup() {
-    Navigator.of(context).push(
+  Future<void> _openProfileSetup() async {
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => const ProfileSetupScreen(isEditing: true),
       ),
     );
+
+    if (!mounted) return;
+
+    await _loadProfile();
   }
 
   String _stringValue(String key) {

@@ -158,70 +158,54 @@ class _ProfileScreenState extends State<ProfileSetupScreen> {
             subtitle: 'First-time setup helps Bridge connect you with the right people.',
           ),
           const SizedBox(height: 20),
-          if (widget.isEditing)
-            _ProfileSummaryCard(dateOfBirth: _selectedDob)
-          else
-            _ProfileCard(nameController: _nameController),
+          _ProfileCard(nameController: _nameController),
           const SizedBox(height: 18),
-          if (!widget.isEditing) ...[
-            const _PreferenceLabel(
-              title: 'What best describes you?',
-              subtitle: 'This helps Bridge know how you want to participate.',
+          const _PreferenceLabel(
+            title: 'What best describes you?',
+            subtitle: 'This helps Bridge know how you want to participate.',
+          ),
+          const SizedBox(height: 12),
+          SegmentedButton<UserRole>(
+            segments: UserRole.values
+                .map(
+                  (role) => ButtonSegment<UserRole>(
+                    value: role,
+                    label: Text(role.label),
+                  ),
+                )
+                .toList(),
+            selected: {_selectedRole},
+            onSelectionChanged: (selection) {
+              setState(() {
+                _selectedRole = selection.first;
+              });
+            },
+          ),
+          const SizedBox(height: 18),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Date of birth'),
+            subtitle: Text(
+              _selectedDob == null
+                  ? 'Select date of birth'
+                  : '${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}',
             ),
-            const SizedBox(height: 12),
-            SegmentedButton<UserRole>(
-              segments: UserRole.values
-                  .map(
-                    (role) => ButtonSegment<UserRole>(
-                      value: role,
-                      label: Text(role.label),
-                    ),
-                  )
-                  .toList(),
-              selected: {_selectedRole},
-              onSelectionChanged: (selection) {
-                setState(() {
-                  _selectedRole = selection.first;
-                });
-              },
-            ),
-            const SizedBox(height: 18),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Date of birth'),
-              subtitle: Text(
-                _selectedDob == null
-                    ? 'Select date of birth'
-                    : '${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}',
-              ),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDob ?? DateTime(2000),
-                  firstDate: DateTime(1920),
-                  lastDate: DateTime.now(),
-                );
+            trailing: const Icon(Icons.calendar_today),
+            onTap: () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: _selectedDob ?? DateTime(2000),
+                firstDate: DateTime(1920),
+                lastDate: DateTime.now(),
+              );
 
-                if (picked != null) {
-                  setState(() {
-                    _selectedDob = picked;
-                  });
-                }
-              },
-            ),
-          ] else ...[
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Date of birth'),
-              subtitle: Text(
-                _selectedDob == null
-                    ? 'Not set'
-                    : '${_selectedDob!.day}/${_selectedDob!.month}/${_selectedDob!.year}',
-              ),
-              trailing: const Icon(Icons.lock_outline),
-            ),
-          ],
+              if (picked != null) {
+                setState(() {
+                  _selectedDob = picked;
+                });
+              }
+            },
+          ),
           const SizedBox(height: 18),
           DropdownButtonFormField<LifeStage>(
             value: _lifeStage,
