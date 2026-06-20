@@ -7,6 +7,7 @@ import '../services/profile_service.dart';
 import '../services/connection_service.dart';
 import 'notifications_screen.dart';
 import 'discussion_tracker_screen.dart';
+import '../services/discussion_service_v2.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -168,7 +169,76 @@ class _RecommendedMatchesSection extends StatelessWidget {
                             const EdgeInsets.only(bottom: 12),
                         child: _MatchCard(
                           match: match,
-                          onPlanTopic: () {},
+                          onPlanTopic: () async {
+                            final controller = TextEditingController();
+                        
+                            final topicTitle = await showDialog<String>(
+                              context: context,
+                              builder: (dialogContext) {
+                                return AlertDialog(
+                                  title: Text(
+                                    'Plan a discussion with ${match.member.name}',
+                                  ),
+                                  content: TextField(
+                                    controller: controller,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Topic title',
+                                      hintText: 'e.g. Career advice',
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(dialogContext);
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () {
+                                        Navigator.pop(
+                                          dialogContext,
+                                          controller.text.trim(),
+                                        );
+                                      },
+                                      child: const Text('Create'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                        
+                            if (topicTitle == null || topicTitle.isEmpty) {
+                              return;
+                            }
+                        
+                            try {
+                              await DiscussionServiceV2.instance.createRoom(
+                                topicTitle: topicTitle,
+                                participantId: match.member.id,
+                                participantName: match.member.name,
+                              );
+                        
+                              if (!context.mounted) return;
+                        
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Discussion created with ${match.member.name}',
+                                  ),
+                                ),
+                              );
+                            } catch (e) {
+                              if (!context.mounted) return;
+                        
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    e.toString(),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                         ),
                       );
                     },

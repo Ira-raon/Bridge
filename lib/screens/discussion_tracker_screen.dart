@@ -108,6 +108,8 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
 
     await DiscussionServiceV2.instance.createRoom(
       topicTitle: draft.title,
+      participantId: draft.match.id,
+      participantName: draft.match.name
     );
 
     _service.addTopic(

@@ -18,6 +18,8 @@ class DiscussionServiceV2 {
 
   Future<void> createRoom({
     required String topicTitle,
+    required String participantId,
+    required String participantName,
   }) async {
     final user = _supabase.auth.currentUser;
 
@@ -28,6 +30,8 @@ class DiscussionServiceV2 {
     await _supabase.from('discussion_rooms').insert({
       'topic_title': topicTitle,
       'created_by': user.id,
+      'participant_id': participantId,
+      'participant_name': participantName,
     });
   }
 
