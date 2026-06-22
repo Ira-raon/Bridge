@@ -16,7 +16,7 @@ class DiscussionServiceV2 {
     return List<Map<String, dynamic>>.from(response);
   }
 
-  Future<void> createRoom({
+  Future<Map<String, dynamic>> createRoom({
     required String topicTitle,
     required String participantId,
     required String participantName,
@@ -27,12 +27,18 @@ class DiscussionServiceV2 {
       throw Exception('User not signed in');
     }
 
-    await _supabase.from('discussion_rooms').insert({
+    final response = await _supabase
+    .from('discussion_rooms')
+    .insert({
       'topic_title': topicTitle,
       'created_by': user.id,
       'participant_id': participantId,
       'participant_name': participantName,
-    });
+    })
+    .select()
+    .single();
+
+    return response;
   }
 
   Future<List<Map<String, dynamic>>> getMessages(

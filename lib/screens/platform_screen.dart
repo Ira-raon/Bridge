@@ -8,6 +8,7 @@ import '../services/connection_service.dart';
 import 'notifications_screen.dart';
 import 'discussion_tracker_screen.dart';
 import '../services/discussion_service_v2.dart';
+import 'discussion_chatroom_screen.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -171,7 +172,7 @@ class _RecommendedMatchesSection extends StatelessWidget {
                           match: match,
                           onPlanTopic: () async {
                             final controller = TextEditingController();
-                        
+
                             final topicTitle = await showDialog<String>(
                               context: context,
                               builder: (dialogContext) {
@@ -206,30 +207,33 @@ class _RecommendedMatchesSection extends StatelessWidget {
                                 );
                               },
                             );
-                        
+
                             if (topicTitle == null || topicTitle.isEmpty) {
                               return;
                             }
-                        
+
                             try {
-                              await DiscussionServiceV2.instance.createRoom(
+                              final room =
+                                  await DiscussionServiceV2.instance.createRoom(
                                 topicTitle: topicTitle,
                                 participantId: match.member.id,
                                 participantName: match.member.name,
                               );
-                        
+
                               if (!context.mounted) return;
-                        
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Discussion created with ${match.member.name}',
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => DiscussionChatroomScreen(
+                                    roomId: room['id'],
+                                    topicTitle: room['topic_title'],
                                   ),
                                 ),
                               );
                             } catch (e) {
                               if (!context.mounted) return;
-                        
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(

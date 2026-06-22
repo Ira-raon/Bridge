@@ -6,9 +6,14 @@ import '../models/discussion_topic.dart';
 import '../services/discussion_service.dart';
 
 class DiscussionChatroomScreen extends StatefulWidget {
-  const DiscussionChatroomScreen({super.key, required this.topic});
+  const DiscussionChatroomScreen({
+    super.key,
+    required this.roomId,
+    required this.topicTitle,
+  });
 
-  final DiscussionTopic topic;
+  final String roomId;
+  final String topicTitle;
 
   @override
   State<DiscussionChatroomScreen> createState() => _DiscussionChatroomScreenState();
@@ -24,29 +29,22 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
   bool _loading = true;
 
   Future<void> _loadMessages() async {
-    try {
-      final room = await _dbService.getRooms();
-  
-      if (room.isEmpty) {
-        setState(() {
-          _loading = false;
-        });
-        return;
-      }
-  
-      final roomId = room.first['id'];
-  
-      final messages =
-          await _dbService.getMessages(roomId);
-  
-      setState(() {
-        _messages = messages;
-        _loading = false;
-      });
-    } catch (e) {
-      print(e);
-    }
+  try {
+    final messages =
+        await _dbService.getMessages(
+      widget.roomId,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _messages = messages;
+      _loading = false;
+    });
+  } catch (e) {
+    print(e);
   }
+}
   @override
   void initState() {
     super.initState();
@@ -63,7 +61,7 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.topic.title),
+        title: Text(widget.topicTitle),
         actions: [
           IconButton(
             tooltip: 'Save session',
@@ -75,12 +73,12 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
       body: ValueListenableBuilder<List<DiscussionRoom>>(
         valueListenable: _service.rooms,
         builder: (context, rooms, _) {
-          final room = rooms.where((entry) => entry.topicId == widget.topic.id).cast<DiscussionRoom?>().firstWhere((entry) => entry != null, orElse: () => null);
+          final room = rooms.where((entry) => entry.topicId == widget.topicTitle).cast<DiscussionRoom?>().firstWhere((entry) => entry != null, orElse: () => null);
           if (room == null) {
             return const Center(child: Text('Chatroom not ready yet.'));
           }
 
-          final forum = _service.findForumByTopicId(widget.topic.id);
+         // final forum = _service.findForumByTopicId(widget.topicTitle);
 
           return Column(
             children: [
@@ -93,20 +91,20 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
                     const SizedBox(height: 12),
                     // ...room.messages.map((message) => _MessageBubble(message: message))
                     ..._messages.map(
-  (message) => ListTile(
-    title: Text(
-      message['sender_name'] ?? '',
-    ),
-    subtitle: Text(
-      message['body'] ?? '',
-    ),
-  ),
-),
+                     (message) => ListTile(
+                      title: Text(
+                       message['sender_name'] ?? '',
+                        ),
+                       subtitle: Text(
+                        message['body'] ?? '',
+                       ),
+                     ),
+                    ),
                     const SizedBox(height: 12),
-                    if (forum != null) ...[
-                      _ForumPanel(forum: forum),
-                      const SizedBox(height: 12),
-                    ],
+                    // if (forum != null) ...[
+                    //   _ForumPanel(forum: forum),
+                    //   const SizedBox(height: 12),
+                    // ],
                   ],
                 ),
               ),
@@ -121,13 +119,13 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
                   //   body: text,
                   // );
                   await _dbService.sendMessage(
-  roomId: room.id,
-  body: text,
-);
+                   roomId: widget.roomId,
+                    body: text,
+                    );
 
-_messageController.clear();
+                   _messageController.clear();
 
-await _loadMessages();
+                    await _loadMessages();
                   // _messageController.clear();
                   // setState(() {});
                 },
@@ -147,13 +145,13 @@ await _loadMessages();
   Future<void> _saveSession(BuildContext context) async {
     final result = await showDialog<_SessionDraft>(
       context: context,
-      builder: (context) => _SessionFinishDialog(topic: widget.topic),
+      builder: (context) => _SessionFinishDialog(topic: widget.topicTitle),
     );
 
     if (result == null) return;
 
     _service.addSession(
-      topicId: widget.topic.id,
+      topicId: widget.roomId,
       summary: result.summary,
       reflection: result.reflection,
       nextStep: result.nextStep,
@@ -293,7 +291,7 @@ class _SessionDraft {
 class _SessionFinishDialog extends StatefulWidget {
   const _SessionFinishDialog({required this.topic});
 
-  final DiscussionTopic topic;
+  final String topic;
 
   @override
   State<_SessionFinishDialog> createState() => _SessionFinishDialogState();
@@ -317,7 +315,7 @@ class _SessionFinishDialogState extends State<_SessionFinishDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Close ${widget.topic.title} session'),
+      title: Text('Close ${widget.topic} session'),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(

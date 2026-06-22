@@ -106,7 +106,7 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
       return;
     }
 
-    await DiscussionServiceV2.instance.createRoom(
+    final room = await DiscussionServiceV2.instance.createRoom(
       topicTitle: draft.title,
       participantId: draft.match.id,
       participantName: draft.match.name
@@ -117,7 +117,7 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
         id: _uuid.v4(),
         matchId: draft.match.id,
         matchName: draft.match.name,
-        roomId: 'room-${_uuid.v4()}',
+        roomId: room['id'].toString(), // Assuming the room ID is returned from createRoom
         category: draft.category,
         title: draft.title,
         cadence: draft.cadence,
@@ -234,8 +234,14 @@ class _TopicCard extends StatelessWidget {
                 children: [
                   FilledButton.tonalIcon(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => DiscussionChatroomScreen(topic: topic)),
+                      Navigator.push(
+                          context,
+                        MaterialPageRoute(
+                          builder: (_) => DiscussionChatroomScreen(
+                          roomId: topic.id,
+                          topicTitle: topic.title,
+                          ),
+                        ),
                       );
                     },
                     icon: const Icon(Icons.chat_bubble_outline_rounded),
