@@ -39,23 +39,31 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
   ),
 ],
       ),
-      body: ValueListenableBuilder<List<DiscussionTopic>>(
-        valueListenable: _service.topics,
-        builder: (context, topics, _) {
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: DiscussionServiceV2.instance.getRooms(),
+        builder: (context, snapshot) {
+
+           if (!snapshot.hasData) {
+                return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+        final rooms = snapshot.data!;
           return ListView(
             padding: const EdgeInsets.all(24),
             children: [
               _TrackerHeader(initialMatch: widget.initialMatch),
               const SizedBox(height: 18),
-              if (topics.isEmpty)
+              if (rooms.isEmpty)
                 const _EmptyTrackerCard()
               else
                 Column(
-                  children: topics
+                  children: rooms
                       .map(
                         (topic) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                            child: _TopicCard(topic: topic, service: _service),
+                            child: _TopicCard(room: topic),   
                         ),
                       )
                       .toList(),
@@ -66,15 +74,28 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
                 subtitle: 'Review earlier sessions to see what changed over time.',
               ),
               const SizedBox(height: 12),
-              if (_service.recentSessions.isEmpty)
-                const _EmptySessionsCard()
-              else
+              // if (_service.recentSessions.isEmpty)
+              //   const _EmptySessionsCard()
+              const Card(
+                child: Padding(
+                padding: EdgeInsets.all(18),
+                child: Text(
+                    'Past discussion reflections will appear here.',
+                 ),
+                ),
+              ),
+              // else
                 Column(
                   children: _service.recentSessions
                       .map(
                         (session) => Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _SessionCard(session: session),
+                          child: Card(
+                          child: Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Text(session.summary),
+                            ),
+                          ),
                         ),
                       )
                       .toList(),
@@ -112,21 +133,21 @@ class _DiscussionTrackerScreenState extends State<DiscussionTrackerScreen> {
       participantName: draft.match.name
     );
 
-    _service.addTopic(
-      DiscussionTopic(
-        id: _uuid.v4(),
-        matchId: draft.match.id,
-        matchName: draft.match.name,
-        roomId: room['id'].toString(), // Assuming the room ID is returned from createRoom
-        category: draft.category,
-        title: draft.title,
-        cadence: draft.cadence,
-        goal: draft.goal,
-        createdAt: DateTime.now(),
-        progressScore: 0,
-        sessions: const [],
-      ),
-    );
+    // _service.addTopic(
+    //   DiscussionTopic(
+    //     id: _uuid.v4(),
+    //     matchId: draft.match.id,
+    //     matchName: draft.match.name,
+    //     roomId: room['id'].toString(), // Assuming the room ID is returned from createRoom
+    //     category: draft.category,
+    //     title: draft.title,
+    //     cadence: draft.cadence,
+    //     goal: draft.goal,
+    //     createdAt: DateTime.now(),
+    //     progressScore: 0,
+    //     sessions: const [],
+    //   ),
+    // );
   }
 }
 
@@ -164,16 +185,12 @@ class _TrackerHeader extends StatelessWidget {
 }
 
 class _TopicCard extends StatelessWidget {
-  const _TopicCard({required this.topic, required this.service});
+  const _TopicCard({required this.room});
 
-  final DiscussionTopic topic;
-  final DiscussionService service;
+  final Map<String, dynamic> room;
 
   @override
   Widget build(BuildContext context) {
-    final recent = topic.sessions.take(2).toList();
-    final forum = service.findForumByTopicId(topic.id);
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -187,46 +204,20 @@ class _TopicCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        topic.title,
+                        room['topic_title'] ?? 'Untitled',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${topic.matchName} • ${topic.category.label} • ${topic.cadence.label}',
+                        room['participant_name'] ?? 'Bridge Member',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: const Color(0xFF61777A)),
                       ),
                     ],
                   ),
                 ),
-                Chip(label: Text('${topic.progressScore}%')),
               ],
             ),
             const SizedBox(height: 10),
-            Text(topic.goal, style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(value: topic.progressScore / 100),
-            ),
-            const SizedBox(height: 12),
-            if (forum != null) ...[
-              Chip(label: Text('Forum live: ${forum.popularityScore} popularity')),
-              const SizedBox(height: 8),
-            ],
-            if (recent.isNotEmpty) ...[
-              Text(
-                'Recent sessions',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 8),
-              ...recent.map(
-                (session) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text('• ${session.summary}', style: Theme.of(context).textTheme.bodySmall),
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerRight,
               child: Wrap(
@@ -238,8 +229,8 @@ class _TopicCard extends StatelessWidget {
                           context,
                         MaterialPageRoute(
                           builder: (_) => DiscussionChatroomScreen(
-                          roomId: topic.id,
-                          topicTitle: topic.title,
+                          roomId: room['id'].toString(),
+                          topicTitle: room['topic_title'] ?? 'Untitled',
                           ),
                         ),
                       );
@@ -247,60 +238,9 @@ class _TopicCard extends StatelessWidget {
                     icon: const Icon(Icons.chat_bubble_outline_rounded),
                     label: const Text('Open chatroom'),
                   ),
-                  FilledButton.tonalIcon(
-                    onPressed: () => _addSession(context, topic),
-                    icon: const Icon(Icons.note_add_outlined),
-                    label: const Text('Add reflection'),
-                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _addSession(BuildContext context, DiscussionTopic topic) async {
-    final result = await showDialog<_SessionDraft>(
-      context: context,
-      builder: (context) => _SessionDialog(topic: topic),
-    );
-
-    if (result == null) {
-      return;
-    }
-
-    service.addSession(
-      topicId: topic.id,
-      summary: result.summary,
-      reflection: result.reflection,
-      nextStep: result.nextStep,
-      progressDelta: result.progressDelta,
-    );
-  }
-}
-
-class _SessionCard extends StatelessWidget {
-  const _SessionCard({required this.session});
-
-  final DiscussionSession session;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(session.summary, style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            Text(session.reflection, style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 8),
-            Text('Next step: ${session.nextStep}', style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 6),
-            Text('Progress moved by +${session.progressDelta}', style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),
@@ -316,21 +256,7 @@ class _EmptyTrackerCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(18),
-        child: Text('No active topics yet. Add one to start tracking sessions and progress.'),
-      ),
-    );
-  }
-}
-
-class _EmptySessionsCard extends StatelessWidget {
-  const _EmptySessionsCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Text('Past discussion sessions will show here once you add reflections.'),
+        child: Text('No active topics yet. Add one to start a discussion room.'),
       ),
     );
   }

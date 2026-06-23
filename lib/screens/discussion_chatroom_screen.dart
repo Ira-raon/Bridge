@@ -14,6 +14,7 @@ class DiscussionChatroomScreen extends StatefulWidget {
 
   final String roomId;
   final String topicTitle;
+  
 
   @override
   State<DiscussionChatroomScreen> createState() => _DiscussionChatroomScreenState();
