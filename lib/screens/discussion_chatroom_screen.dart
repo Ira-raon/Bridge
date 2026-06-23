@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/discussion_service_v2.dart';
-
 import '../models/discussion_room.dart';
 import '../models/discussion_topic.dart';
 import '../services/discussion_service.dart';
@@ -71,17 +70,7 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
           ),
         ],
       ),
-      body: ValueListenableBuilder<List<DiscussionRoom>>(
-        valueListenable: _service.rooms,
-        builder: (context, rooms, _) {
-          final room = rooms.where((entry) => entry.topicId == widget.topicTitle).cast<DiscussionRoom?>().firstWhere((entry) => entry != null, orElse: () => null);
-          if (room == null) {
-            return const Center(child: Text('Chatroom not ready yet.'));
-          }
-
-         // final forum = _service.findForumByTopicId(widget.topicTitle);
-
-          return Column(
+      body: Column(
             children: [
               Expanded(
                 child: ListView(
@@ -132,9 +121,9 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
                 },
               ),
             ],
-          );
-        },
       ),
+      
+    
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _saveSession(context),
         icon: const Icon(Icons.flag_rounded),
