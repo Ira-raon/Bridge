@@ -54,27 +54,43 @@ class DiscussionServiceV2 {
   }
 
   Future<void> sendMessage({
-  required String roomId,
-  required String body,
-}) async {
-  final user = _supabase.auth.currentUser;
+    required String roomId,
+    required String body,
+    }) async {
+    final user = _supabase.auth.currentUser;
 
-  if (user == null) {
-    throw Exception('User not signed in');
-  }
+    if (user == null) {
+      throw Exception('User not signed in');
+    }
 
-  final profile = await _supabase
+    final profile = await _supabase
       .from('profiles')
       .select('display_name')
       .eq('id', user.id)
       .single();
 
-  await _supabase.from('discussion_messages').insert({
-    'room_id': roomId,
-    'sender_id': user.id,
-    'sender_name':
-        profile['display_name'] ?? 'Bridge Member',
-    'body': body,
-  });
-}
+    final room = await _supabase
+    .from('discussion_rooms')
+    .select('participant_id')
+    .eq('id', roomId)
+    .single();
+
+    await _supabase.from('discussion_messages').insert({
+      'room_id': roomId,
+      'sender_id': user.id,
+      'sender_name':
+          profile['display_name'] ?? 'Bridge Member',
+      'body': body,
+    });
+    if (room['participant_id'] != user.id) {
+    await _supabase.from('notifications').insert({
+      'user_id': room['participant_id'],
+      'title':
+          '${profile['display_name'] ?? 'Bridge Member'} sent you a message',
+      'body': body,
+      'type': 'chat',
+      'reference_id': roomId,
+      });
+    }
+  }
 }
