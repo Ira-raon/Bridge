@@ -54,21 +54,27 @@ class DiscussionServiceV2 {
   }
 
   Future<void> sendMessage({
-    required String roomId,
-    required String body,
-  }) async {
-    final user = _supabase.auth.currentUser;
+  required String roomId,
+  required String body,
+}) async {
+  final user = _supabase.auth.currentUser;
 
-    if (user == null) {
-      throw Exception('User not signed in');
-    }
-
-    await _supabase.from('discussion_messages').insert({
-      'room_id': roomId,
-      'sender_id': user.id,
-      'sender_name':
-          user.email ?? 'Bridge Member',
-      'body': body,
-    });
+  if (user == null) {
+    throw Exception('User not signed in');
   }
+
+  final profile = await _supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', user.id)
+      .single();
+
+  await _supabase.from('discussion_messages').insert({
+    'room_id': roomId,
+    'sender_id': user.id,
+    'sender_name':
+        profile['display_name'] ?? 'Bridge Member',
+    'body': body,
+  });
+}
 }
