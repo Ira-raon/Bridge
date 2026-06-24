@@ -68,15 +68,6 @@ class DiscussionServiceV2 {
       .select('display_name')
       .eq('id', user.id)
       .single();
-
-    await _supabase.from('discussion_messages').insert({
-      'room_id': roomId,
-      'sender_id': user.id,
-      'sender_name':
-          profile['display_name'] ?? 'Bridge Member',
-      'body': body,
-    });
-    
     print('about to fetch room');
     final room = await _supabase
     .from('discussion_rooms')
@@ -88,7 +79,13 @@ class DiscussionServiceV2 {
 
     print('About to insert notification');
 
-    
+    await _supabase.from('discussion_messages').insert({
+      'room_id': roomId,
+      'sender_id': user.id,
+      'sender_name':
+          profile['display_name'] ?? 'Bridge Member',
+      'body': body,
+    });
     if (room['participant_id'] != user.id) {
     await _supabase.from('notifications').insert({
       'user_id': room['participant_id'],
