@@ -70,14 +70,17 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: _loading
+                ? const Center(
+              child: CircularProgressIndicator(),
+                  ): Column(
             children: [
               Expanded(
                 child: ListView(
                   reverse: true,
                   padding: const EdgeInsets.all(16),
                   children: [
-                    _RoomHeader(room: room),
+                    _RoomHeader(topicTitle: widget.topicTitle),
                     const SizedBox(height: 12),
                     // ...room.messages.map((message) => _MessageBubble(message: message))
                     ..._messages.map(
@@ -151,9 +154,11 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
 }
 
 class _RoomHeader extends StatelessWidget {
-  const _RoomHeader({required this.room});
+  const _RoomHeader({
+    required this.topicTitle,
+  });
 
-  final DiscussionRoom room;
+  final String topicTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -163,18 +168,29 @@ class _RoomHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(room.topicTitle, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              topicTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 4),
-            Text('Discussion room with ${room.matchName}', style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              'Discussion room',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 8),
-            Text('Every pair gets its own room so the session stays structured and easy to review later.', style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              'Every pair gets its own room so the session stays structured and easy to review later.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       ),
     );
   }
 }
-
 class _MessageBubble extends StatelessWidget {
   const _MessageBubble({required this.message});
 
