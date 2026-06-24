@@ -127,11 +127,11 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
       ),
       
     
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _saveSession(context),
-        icon: const Icon(Icons.flag_rounded),
-        label: const Text('Close session'),
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () => _saveSession(context),
+      //   icon: const Icon(Icons.flag_rounded),
+      //   label: const Text('Close session'),
+      // ),
     );
   }
 
