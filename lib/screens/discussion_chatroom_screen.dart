@@ -4,6 +4,7 @@ import '../models/discussion_room.dart';
 import '../models/discussion_topic.dart';
 import '../services/discussion_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 class DiscussionChatroomScreen extends StatefulWidget {
   const DiscussionChatroomScreen({
@@ -122,11 +123,22 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
                               Text(
                                 message['body'] ?? '',
                               ),
+                              const SizedBox(height: 6),
+
+                              Text(
+                                DateFormat('h:mm a').format(
+                                  DateTime.parse(message['created_at']).toLocal(),
+                                ),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                     const SizedBox(height: 12),
                     // if (forum != null) ...[
                     //   _ForumPanel(forum: forum),

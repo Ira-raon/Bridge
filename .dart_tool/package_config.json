@@ -152,6 +152,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "intl",
+      "rootUri": "file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.20.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.3"
+    },
+    {
       "name": "jwt_decode",
       "rootUri": "file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/jwt_decode-0.3.1",
       "packageUri": "lib/",
@@ -506,7 +512,7 @@
       "languageVersion": "3.7"
     }
   ],
-  "generated": "2026-06-05T15:30:51.313796Z",
+  "generated": "2026-06-24T15:53:31.554746Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///C:/Users/sakis/OneDrive/flutter",

@@ -86,6 +86,10 @@ http_parser
 3.4
 file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.2/
 file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.1.2/lib/
+intl
+3.3
+file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.20.2/
+file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.20.2/lib/
 jwt_decode
 2.12
 file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/jwt_decode-0.3.1/
@@ -314,6 +318,10 @@ yet_another_json_isolate
 3.0
 file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/yet_another_json_isolate-2.1.0/
 file:///C:/Users/sakis/AppData/Local/Pub/Cache/hosted/pub.dev/yet_another_json_isolate-2.1.0/lib/
+bridge
+3.7
+file:///C:/Users/sakis/Bridge/
+file:///C:/Users/sakis/Bridge/lib/
 sky_engine
 3.7
 file:///C:/Users/sakis/OneDrive/flutter/bin/cache/pkg/sky_engine/
@@ -330,8 +338,4 @@ flutter_web_plugins
 3.7
 file:///C:/Users/sakis/OneDrive/flutter/packages/flutter_web_plugins/
 file:///C:/Users/sakis/OneDrive/flutter/packages/flutter_web_plugins/lib/
-bridge
-3.7
-file:///C:/Users/sakis/personal/
-file:///C:/Users/sakis/personal/lib/
 2
