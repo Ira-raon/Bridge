@@ -3,6 +3,7 @@ import '../services/discussion_service_v2.dart';
 import '../models/discussion_room.dart';
 import '../models/discussion_topic.dart';
 import '../services/discussion_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DiscussionChatroomScreen extends StatefulWidget {
   const DiscussionChatroomScreen({
@@ -83,16 +84,49 @@ class _DiscussionChatroomScreenState extends State<DiscussionChatroomScreen> {
                     _RoomHeader(topicTitle: widget.topicTitle),
                     const SizedBox(height: 12),
                     // ...room.messages.map((message) => _MessageBubble(message: message))
-                    ..._messages.map(
-                     (message) => ListTile(
-                      title: Text(
-                       message['sender_name'] ?? '',
+                                        ..._messages.map((message) {
+                      final currentUserId =
+                          Supabase.instance.client.auth.currentUser?.id;
+
+                      final isMine =
+                          message['sender_id'] == currentUserId;
+
+                      return Align(
+                        alignment:
+                            isMine ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 280),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isMine
+                                ? Theme.of(context).colorScheme.primaryContainer
+                                : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: isMine
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                message['sender_name'] ?? '',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              ),
+
+                              const SizedBox(height: 4),
+
+                              Text(
+                                message['body'] ?? '',
+                              ),
+                            ],
+                          ),
                         ),
-                       subtitle: Text(
-                        message['body'] ?? '',
-                       ),
-                     ),
-                    ),
+                      );
+                    }).toList(),
                     const SizedBox(height: 12),
                     // if (forum != null) ...[
                     //   _ForumPanel(forum: forum),
