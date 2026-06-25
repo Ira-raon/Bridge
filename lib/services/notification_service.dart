@@ -31,4 +31,31 @@ class NotificationService {
         })
         .eq('id', id);
   }
+  Future<void> markAllAsRead() async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) return;
+
+    await _supabase
+        .from('notifications')
+        .update({
+          'is_read': true,
+        })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+  }
+  Future<List<Map<String, dynamic>>> getUnreadNotifications() async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) return [];
+
+    final data = await _supabase
+        .from('notifications')
+        .select()
+        .eq('user_id', user.id)
+        .eq('is_read', false)
+        .order('created_at', ascending: false);
+
+    return List<Map<String, dynamic>>.from(data);
+  }
 }

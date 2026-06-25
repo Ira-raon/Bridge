@@ -49,7 +49,7 @@ class _PlatformScreenState extends State<PlatformScreen> {
                       icon: FutureBuilder<List<dynamic>>(
                        future: Future.wait([
                           ConnectionService.instance.getPendingRequests(),
-                          NotificationService.instance.getNotifications()
+                          NotificationService.instance.getUnreadNotifications()
                         ]),
                             
                         builder: (context, snapshot) {

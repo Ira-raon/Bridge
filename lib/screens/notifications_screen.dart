@@ -23,6 +23,12 @@ class _NotificationsScreenState
   Future<void> _refresh() async {
     setState(() {});
   }
+  @override
+  void initState() {
+    super.initState();
+
+    _notificationService.markAllAsRead();
+  }
 
   @override
   Widget build(BuildContext context) {
