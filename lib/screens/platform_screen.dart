@@ -356,30 +356,30 @@ class _MatchCard extends StatelessWidget {
                     label: const Text('Connect'),
                     icon: const Icon(Icons.link_rounded),
                     onPressed: () async {
-  try {
-    await ConnectionService.instance.sendRequest(
-      match.member.id,
-    );
+                      try {
+                        await ConnectionService.instance.sendRequest(
+                          match.member.id,
+                        );
 
-    if (!context.mounted) return;
+                        if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Connection request sent to ${match.member.name}',
-        ),
-      ),
-    );
-  } catch (e) {
-    if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Connection request sent to ${match.member.name}',
+                            ),
+                          ),
+                        );
+                      } catch (e) {
+                        if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.toString()),
-      ),
-    );
-  }
-},
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.toString()),
+                          ),
+                        );
+                      }
+                    },
                   
                   ),
                 ],
@@ -553,27 +553,86 @@ class _ActiveDiscussionsPreview extends StatelessWidget {
       children: [
         const _SectionHeader(
           title: 'Active discussions',
-          subtitle: 'Continue conversations that matter.',
+          subtitle: 'Continue conversations.',
         ),
 
         const SizedBox(height: 12),
 
-        Card(
-          child: ListTile(
-            title: const Text('No active discussions yet'),
-            subtitle: const Text(
-              'Plan a topic to begin your first discussion.',
-            ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const DiscussionTrackerScreen(),
-                ),
-              );
-            },
+        FutureBuilder<List<Map<String, dynamic>>>(
+  future: DiscussionServiceV2.instance.getRooms(),
+  builder: (context, snapshot) {
+
+    if (!snapshot.hasData) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(
+            child: CircularProgressIndicator(),
           ),
+        ),
+      );
+    }
+
+    final rooms = snapshot.data ?? [];
+
+    if (rooms.isEmpty) {
+      return Card(
+        child: ListTile(
+          title: const Text(
+            'No active discussions yet',
+          ),
+          subtitle: const Text(
+            'Plan a topic to begin your first discussion.',
+          ),
+          trailing: const Icon(
+            Icons.chevron_right,
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    const DiscussionTrackerScreen(),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+            return Card(
+              child: Column(
+                children: rooms.take(3).map((room) {
+                  return ListTile(
+                    title: Text(
+                      room['topic_title'] ?? 'Untitled',
+                    ),
+                    subtitle: Text(
+                      room['participant_name']
+                          ?? 'Bridge Member',
+                    ),
+                    trailing: const Icon(
+                      Icons.chat_bubble_outline,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              DiscussionChatroomScreen(
+                            roomId:
+                                room['id'].toString(),
+                            topicTitle:
+                                room['topic_title'],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
+            );
+          },
         ),
       ],
     );
