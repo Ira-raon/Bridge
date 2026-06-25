@@ -9,6 +9,7 @@ import 'notifications_screen.dart';
 import 'discussion_tracker_screen.dart';
 import '../services/discussion_service_v2.dart';
 import 'discussion_chatroom_screen.dart';
+import '../services/notification_service.dart';
 
 class PlatformScreen extends StatefulWidget {
   const PlatformScreen({super.key});
@@ -45,13 +46,27 @@ class _PlatformScreenState extends State<PlatformScreen> {
                         setState(() {});
                       }
                    },
-                      icon: FutureBuilder<List<Map<String, dynamic>>>(
-                        future: ConnectionService.instance
-                            .getPendingRequests(),
+                      icon: FutureBuilder<List<dynamic>>(
+                       future: Future.wait([
+                          ConnectionService.instance.getPendingRequests(),
+                          NotificationService.instance.getNotifications()
+                        ]),
+                            
                         builder: (context, snapshot) {
                         
-                          final count =
-                              snapshot.data?.length ?? 0;
+                        final requests =
+                          snapshot.hasData
+                            ? snapshot.data![0] as List
+                            : [];
+
+                        final notifications =
+                          snapshot.hasData
+                            ? snapshot.data![1] as List
+                            : [];
+
+                        final count =
+                            requests.length +
+                            notifications.length;
 
                           return Stack(
                             children: [
