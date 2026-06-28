@@ -65,6 +65,11 @@ class _NotificationsScreenState
           final notifications =
             snapshot.data?[1]
                 as List<Map<String,dynamic>>? ?? [];
+          
+          final unreadNotifications =
+            notifications
+              .where((n) => n['is_read'] == false)
+              .toList();
 
           if (requests.isEmpty && notifications.isEmpty) {
             return const Center(
@@ -153,7 +158,7 @@ class _NotificationsScreenState
               
                   // Chat Notifications
               
-                  ...notifications.map(
+                  ...unreadNotifications.map(
                     (notification) => Card(
                       margin: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -163,6 +168,15 @@ class _NotificationsScreenState
                         leading: const Icon(
                           Icons.notifications,
                         ),
+                        onTap: () async {
+                          await _notificationService.markAsRead(
+                          notification['id'],
+                            );
+
+                          if (mounted) {
+                            setState(() {});
+                              }
+                            },
                         title: Text(
                           notification['title'] ?? '',
                         ),
