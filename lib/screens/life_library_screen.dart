@@ -100,7 +100,7 @@ class _LifeLibraryScreenState extends State<LifeLibraryScreen> {
                                     FilledButton.icon(
                                       onPressed: () async {
                                       
-                                        await _service.helpedMe(
+                                        await _service.toggleHelped(
                                           story['id'],
                                         );
 
@@ -165,51 +165,81 @@ class _LifeLibraryScreenState extends State<LifeLibraryScreen> {
                 );
               },
             ),
-          ],  
-            // Saved
-            ValueListenableBuilder<List<Story>>(
-              valueListenable: _service.stories,
-              builder: (context, list, _) {
-                return ValueListenableBuilder<Set<String>>(
-                  valueListenable: _service.savedIds,
-                  builder: (context, saved, __) {
-                    final savedStories = list.where((s) => saved.contains(s.id)).toList();
-                    if (savedStories.isEmpty) {
-                      return const Center(child: Text('No saved stories yet.'));
-                    }
-
-                    return ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: savedStories.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, i) {
-                        final s = savedStories[i];
-                        return Card(
-                          child: ListTile(
-                            title: Text(s.title),
-                            subtitle: Text('by ${s.author} — ${s.createdAt.toLocal().toString().split('.').first}'),
-                            onTap: () => _showStory(context, s),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline),
-                                  onPressed: () => _service.removeById(s.id),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.bookmark),
-                                  onPressed: () => _service.toggleSaved(s.id),
-                                ),
-                              ],
-                            ),
-                          ),
+            
+           // Saved
+          FutureBuilder<List<Map<String, dynamic>>>(
+            future: _service.getSavedStories(),
+            builder: (context, snapshot) {
+            
+              if (snapshot.connectionState ==
+                  ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+          
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(snapshot.error.toString()),
+                );
+              }
+          
+              final savedStories = snapshot.data ?? [];
+          
+              if (savedStories.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No saved stories yet.',
+                  ),
+                );
+              }
+          
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: savedStories.length,
+                itemBuilder: (context, index) {
+                
+                  final story =
+                      savedStories[index]['life_library'];
+          
+                  return Card(
+                    margin:
+                        const EdgeInsets.only(bottom: 16),
+                    child: ListTile(
+                    
+                      title: Text(
+                        story['title'],
+                      ),
+          
+                      subtitle: Text(
+                        'Shared by ${story['author_name']}',
+                      ),
+          
+                      onTap: () {
+                        _showStory(
+                          context,
+                          story,
                         );
                       },
-                    );
-                  },
-                );
-              },
-            ),
+          
+                      trailing: IconButton(
+                        icon: const Icon(Icons.bookmark),
+                        onPressed: () async {
+                        
+                          await _service.toggleSaved(
+                            story['id'],
+                          );
+          
+                          setState(() {});
+          
+                        },
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -279,8 +309,36 @@ class _LifeLibraryScreenState extends State<LifeLibraryScreen> {
                     ),
 
                     const SizedBox(height: 24),
+                    FutureBuilder<int>(
+                      future: _service.getHelpedCount(
+                        story['id'],
+                      ),
+                      builder: (context, snapshot) {
+                      
+                        final helped =
+                            snapshot.data ?? 0;
 
-                    const Divider(),
+                        return Row(
+                          children: [
+                          
+                            const Icon(
+                              Icons.favorite,
+                              color: Colors.red,
+                            ),
+
+                            const SizedBox(width: 8),
+
+                            Text(
+                              'Helped $helped ${helped == 1 ? "person" : "people"}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
 
                     const Divider(),
 

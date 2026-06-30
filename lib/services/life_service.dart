@@ -64,15 +64,23 @@ class LifeService {
         .eq('id', id);
 
   }
-  Future<void> helpedMe(String storyId) async {
+  Future<void> toggleHelped(String storyId) async {
 
     final user = _supabase.auth.currentUser;
 
     if (user == null) return;
 
-    await _supabase
-      .from('life_library_helped')
-      .insert({
+    final existing = await _supabase
+        .from('life_library_helped')
+        .select()
+        .eq('story_id', storyId)
+        .eq('user_id', user.id);
+
+    if (existing.isEmpty) {
+
+      await _supabase
+          .from('life_library_helped')
+          .insert({
 
         'story_id': storyId,
 
@@ -80,6 +88,15 @@ class LifeService {
 
       });
 
+    } else {
+
+      await _supabase
+          .from('life_library_helped')
+          .delete()
+          .eq('story_id', storyId)
+          .eq('user_id', user.id);
+
+    }
   }
   Future<void> saveStory(String storyId) async {
     final user = _supabase.auth.currentUser;
@@ -168,5 +185,44 @@ class LifeService {
           'reflection': reflection,
 
         });
+  }
+  Future<int> getHelpedCount(String storyId) async {
+
+    final data = await _supabase
+        .from('life_library_helped')
+        .select()
+        .eq('story_id', storyId);
+
+    return data.length;
+  }
+  Future<bool> hasHelped(String storyId) async {
+
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) return false;
+
+    final data = await _supabase
+        .from('life_library_helped')
+        .select()
+        .eq('story_id', storyId)
+        .eq('user_id', user.id);
+
+    return data.isNotEmpty;
+  }
+  Future<List<Map<String, dynamic>>> getSavedStories() async {
+
+    final user = _supabase.auth.currentUser;
+  
+    if (user == null) return [];
+  
+    final data = await _supabase
+        .from('life_library_saved')
+        .select('''
+          story_id,
+          life_library(*)
+        ''')
+        .eq('user_id', user.id);
+  
+    return List<Map<String, dynamic>>.from(data);
   }
 }
